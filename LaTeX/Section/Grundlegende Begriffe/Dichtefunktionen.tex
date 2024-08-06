@@ -1,0 +1,715 @@
+\subsection{Dichtefunktionen}
+
+Wir wollen uns weiter mit dem oben definierten Bildmaß beschäftigen. Um einfacher damit rechnen zu können, benötigen wir zuerst folgende
+
+\begin{Definition}{(Dichtefunktion)}
+Sei $(\Omega, \mathscr{A}, \mu)$ ein Maßraum und $f: \Omega \rightarrow [0, \infty)$ eine messbare Funktion. Zu $A \in \mathscr{A}$ ist durch
+\[\nu(A) := \int \indi_{A} f d \mu~.\]
+ein Maß definiert. Man nennt $f$ dann \textit{Dichtefunktion} oder kurz \textit{Dichte} \en{density} von $\nu$ bezüglich $\mu$.
+\end{Definition}
+
+\newpage
+
+Wenden wir diese Definition jetzt speziell auf Wahrscheinlichkeitsmaße an, so erhalten wir die folgende
+
+\begin{Definition}{(Wahrscheinlichkeitsdichte)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Ist $\varphi: \mathbb{R} \rightarrow [0, \infty)$ eine messbare Funktion und gilt für alle $B \in \mathscr{B}$
+\begin{align*}
+\mathbb{P}_X(B) &= \int_{\mathbb{R}} \indi_B \varphi \d \lambda\\
+&= \int_B \varphi(x) \d \lambda(x)~,
+\end{align*}
+so heißt $\varphi$ \textit{Lebesgue-Borel-Dichte} von $\mathbb{P}_X$ oder kurz \textit{Lebesgue-Dichte} von $X$. Ist $\varphi: E \rightarrow [0, \infty)$ eine messbare Funktion mit $E \subset \mathbb{R}$ höchstens abzählbar und gilt für alle $B \in \mathcal{P}(E)$
+\begin{align*}
+\mathbb{P}_X(B) &= \int_{E} \indi_B \varphi \d \#\\
+&= \sum_{b \in B} \varphi(b)~,
+\end{align*}
+so heißt $\varphi$ \textit{Zähldichte} von $\mathbb{P}_X$ oder einfach von $X$.
+\end{Definition}
+
+Da sich, wie wir noch sehen werden, Zufallsvariablen sehr unterschiedlich verhalten, je nachdem welche Dichte sie besitzen, benötigen wir für diese Bachelorarbeit noch folgende eher untypische
+
+\begin{Definition}{(Finite / Diskrete / Stetige Zufallsvariablen)}
+\hypertarget{Def:Dichtefunktion}{}Sei $X$ eine reelle Zufallsvariable. Wir nennen $X$ \textit{finit} \en{finite}, falls eine Zähldichte existiert und der Träger dieser Funktion endlich ist. Wir nennen $X$ \textit{diskret} \en{discrete}, falls eine Zähldichte existiert und der Träger dieser Funktion abzählbar ist. Wir nennen $X$ \textit{stetig} \en{continuous}, falls eine Lebesgue-Dichte existiert.
+\end{Definition}
+
+Diese spezielle und eher untypische Wortwahl wird nun näher erläutern.
+
+\begin{Bemerkung}{(Wortwahl)}
+Normalerweise werden diskrete Zufallsvariablen als Zufallsvariablen mit Zähldichte definiert, ohne dabei näher auf die Mächtigkeit des Trägers einzugehen. Damit wäre die Menge der finiten Zufallsvariablen in der Menge der diskreten Zufallsvariablen enthalten. Da wir für diese Typen von Zufallsvariablen im Code sehr unterschiedliche Methoden entwickeln müssen, werden wir in dieser Bachelorarbeit diese Mengen scharf unterscheiden und aus der Menge der diskreten Zufallsvariablen alle Finiten rausschneiden.
+\end{Bemerkung}
+
+Wir wollen nun jeweils ein Beispiel für diese Typen von Zufallsvariablen betrachten.
+
+\begin{Beispiel}{(Würfelwurf, Münzwurf und Regentropfen)}
+\begin{enumerate}[label=(\roman*)]
+\item \hypertarget{Bsp:Würfel}{}Wir modellieren mit $X$ den Wurf eines sechsseitigen Würfels. Dann gilt
+\[\Im(X) = \{1, 2, 3, 4, 5, 6\}~.\]
+Die Zähldichte ist also für $n \in \{1, \dots, 6\}$ gegeben durch
+\[\varphi(n) = \frac{1}{6} \sum_{i = 1}^6 \indi_{i}(n)~.\]
+Stochastisch ist dies eine Gleichverteilung auf $\{1, \dots, 6\}$. Der Würfelwurf ist also eine finite, reelle Zufallsvariable.
+
+\item \hypertarget{Bsp:Münze}{}Wir werfen eine faire Münze. Die Zufallsvariable $X$ sei die Anzahl der Würfe bis zum ersten Mal Kopf geworfen wird. Es gilt
+\[\varphi(n) = 2^{-n}\]
+für alle $n \in \mathbb{N}$. Dies ist also eine diskrete, reelle Zufallsvariable.
+
+\item \hypertarget{Bsp:Regen}{}Wir betrachten einen ein Meter langen, eindimensionalen Strich und modellieren mit $X$ die Position, auf der ein punktförmiger Regentropfen auftrifft. Die Lebesgue-Dichte ist also für $x \in \mathbb{R}$
+\[\varphi(x) = \indi_{[0, 1]}(x)~.\]
+Stochastisch ist dies eine Gleichverteilung auf $[0, 1]$. Dies ist ein Beispiel für eine stetige, reelle Zufallsvariable.
+\end{enumerate}
+Wir werden in späteren Kapiteln noch viele weitere Beispiele für die verschiedenen Typen von Zufallsvariablen kennenlernen.
+\end{Beispiel}
+
+Mit diesen Definitionen können wir beginnen den Code zu erläutern. Wir beginnen damit ein Objekt aus der \lstinline|RandomVariable|-Klasse zu initialisieren, damit wir später damit weiterarbeiten können.
+
+\begin{Code}{(Initialisierung)}
+\hypertarget{Code:Initialisierung}{}Wie wir gesehen haben, können wir eine Zufallsvariable durch ihre Dichtefunktionen definieren. Weiter benötigen wir noch den Typ der Zufallsvariable. Hierfür muss man dann \lstinline|RandomVariableFinite|, \lstinline|RandomVariableDiscrete| oder \lstinline|RandomVariableContinuous| aufrufen, um ein entsprechendes Objekt zu erhalten. Die Initialisierung läuft bei allen Typen ähnlich ab.
+\begin{lstlisting}
+def __init__(self, density, variable, force_density=False):
+    self.density = density
+    self.variable = variable
+    self.force_density = force_density
+    if force_density == False:
+        self._is_density()
+\end{lstlisting}
+Mit dem \lstinline|density| Argument definieren wir die Dichtefunktion der eingegebenen Zufallsvariable. Um den Nutzer nicht in der Wahl der Variablen einzuschränken, wird über das Attribut \lstinline|variable| die verwendete Variable übergeben. Je nachdem, in welchem Typen man sich befindet, wird automatisch das Attribut \lstinline|type| definiert, was dann entsprechende \lstinline|'f'|, \lstinline|'d'| oder \lstinline|'c'| für finite, diskrete oder stetige Zufallsvariablen ist.\\
+
+Es ist zu beachten, dass stetige und diskrete Zufallsvariablen noch ein \lstinline|supp| Argument besitzen. Dies ist eine Liste, welche jeweils die Integrations- beziehungsweise Summationsgrenzen der verwendeten Variablen enthält. Vergibt man dieses Attribut nicht, so wird $(- \infty, \infty)$ beziehungsweise $[0, \infty)$ verwendet. Dieses Attribut ist vor allem wichtig für Dichten stetiger Zufallsvariablen, die eine Indikatorfunktion beinhalten, denn SymPy verträgt stückweise Funktionen \en{piecewise} nicht gut. Möchte man also eine Zufallsvariable mit der Dichte
+\[\varphi: [0, \infty) \rightarrow \mathbb{R}\]
+definieren, so verwendet man \lstinline|supp = [sym.Integer(0), sym.oo]|.\\
+Um zu überprüfen, ob das so definierte Wahrscheinlichkeitsmaß normiert ist, wird die Methode \lstinline|is_density()| in der jeweiligen Unterklasse aufgerufen. Um diese verstehen zu können, benötigen wir noch ein wichtiges \hyperlink{Kor:Dichtekorollar}{\blue{Werkzeug}}.
+\end{Code}
+
+Wir werden nun typische Beispiele für das Erstellen von Zufallsvariablen betrachten.
+
+\begin{Beispiel}{(Erstellen von Zufallsvariablen)}
+\hypertarget{Bsp:Erstellung}{}
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X \sim \Ber(p)$ Bernoulli-verteilt mit Parameter $p \in (0, 1)$. Die Zähldichte ist dann
+\[\mathbb{P}(X = 1) = p, \tab \mathbb{P}(X = 0) = 1 - p~.\]
+Dies ist eine finite Zufallsvariable.
+
+\newpage
+
+Zur Initialisierung definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+n = sym.Symbol('n', integer=True, nonnegative=True)
+p = sym.Symbol('p', real=True, positive=True)
+density = {1: p, 0: 1 - p}
+\end{lstlisting}
+Dies ist ein Dictionary. Die Schlüssel \en{keys} sind jeweils die Werte der Zufallsvariable und die Werte \en{values} sind die zugehörige Wahrscheinlichkeiten. Es ist nicht nötig die \lstinline|0| und die \lstinline|1| als SymPy Objekte zu definieren, da bei der Initialisierung dieses Objektes die Funktion \lstinline|_make_density| aufgerufen wird, die die Einträge im Dictionary in SymPy-Objekte verwandelt. Schaden tut es trotzdem nicht. Die Verwendung von SymPy-Objekten kann vor allem nützlich sein, wenn man rationale Werte verwenden möchte, da diese in Python sonst als Kommazahl gerundet werden. Um daraus nun ein \lstinline|RandomVariable|-Objekt zu machen, definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=4]
+rv = RandomVariableFinite(density, n)
+\end{lstlisting}
+Wir müssen die Variable \lstinline|n| übergeben, um zu definieren, welche Variable wir für die Integration verwenden wollen.
+
+\item Sei $X \sim \Bin(n, p)$ binomialverteilt mit Parameter $n \in \mathbb{N}$ und $p \in (0, 1)$. Die Zähldichte ist für $k \in \{0, \dots, n\}$ dann gegeben durch
+\[\varphi(k) = \begin{pmatrix}n \\ k\end{pmatrix} p^k (1 - p)^{n-k}~.\]
+Dies ist eine diskrete Zufallsvariable. Zur Initialisierung definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+n, k = sym.symbols('n, k', integer=True, nonnegative=True)
+p = sym.Symbol('p', real=True, positive=True)
+density = sym.binomial(n, k) * p**k * (1 - p)**(n - k)
+\end{lstlisting}
+Um daraus nun ein \lstinline|RandomVariable|-Objekt zu machen, definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=4]
+rv = RandomVariableDiscrete(density, k)
+\end{lstlisting}
+In der Konsole wird der Text \lstinline|WARNING: Chopped up piecwise-function| ausgegeben. Dies verursacht allgemein keine weiteren Schwierigkeiten. Der Grund ist in diesem Fall, dass die Reihe für $p \in [0, 1]$ vereinfacht werden kann, für $p > 1$ jedoch nicht. Somit bildet SymPy eine stückweise Funktion mit diesen beiden Ästen.\\
+Es sei erwähnt, dass Binomialverteilungen eigentlich keine diskreten Zufallsvariablen sind, da die Werte aus der endlichen Menge $\{0, \dots, n\}$ sind. Da aber
+\[\begin{pmatrix}n \\ k\end{pmatrix} = 0\]
+ist für $k > n$ und SymPy sehr gut mit dem Binomialkoeffizient rechnen kann, können wir dies so verwenden. Wöllte man dies als echte finite Zufallsvariable definieren, so müsste man die Variable $n$ fest wählen und damit dann ein Dictionary definieren. Man würde also einen Großteil der Flexibilität verlieren. Für $n = 1$ erhält man beispielsweise obige Bernoulli-Verteilung.
+
+\item Sei $X \sim \Nor(0, 1)$ standardnormalverteilt. Die Lebesgue-Dichte ist dann für $x \in \mathbb{R}$
+\[\varphi(x) = \frac{1}{\sqrt{2 \pi}} \exp\left( - \frac{x^2}{2} \right)~.\]
+Dies ist eine stetige Zufallsvariable.
+
+\newpage
+
+Zur Initialisierung definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+density = 1 / sym.sqrt(2 * sym.pi) * sym.exp(- x**2 / 2)
+\end{lstlisting}
+Um daraus nun ein \lstinline|RandomVariable|-Objekt zu machen, definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=3]
+rv = RandomVariableContinuous(density, x)
+\end{lstlisting}
+
+\item Sei $X \sim \Exp(\lambda)$ exponentialverteilt mit Parameter $\lambda > 0$. Die Lebesgue-Dichte ist dann für $x \in \mathbb{R}$
+\[\varphi(x) = \lambda \exp(- \lambda x) \indi_{[0, \infty)}(x)~.\]
+Dies ist eine stetige Zufallsvariable. Zur Initialisierung definieren wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+lamda = sym.Symbol('lambda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * x)
+\end{lstlisting}
+Es ist zu beachten, dass wir als Variablennamen für den Parameter nicht \lstinline|lambda| verwenden können, da dies in Python schon mit den Lambda-Funktionen belegt ist. Weiter sei erwähnt, dass wir hier keine stückweise Funktion mit SymPy bauen, da dies später zu großen Problemen führt. Um zu definieren, dass der Träger nur $[0, \infty)$ ist, benötigen wir bei der Erstellung des Objekts das Argument
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=4]
+supp = [sym.Integer(0), sym.oo]
+\end{lstlisting}
+Zusammen ergibt sich dann
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=5]
+rv = RandomVariableContinuous(density, x, supp=supp)
+\end{lstlisting}
+\end{enumerate}
+\vspace*{-\medskipamount}
+Wir werden später noch viele weitere \lstinline|RandomVariable|-Objekte definieren.
+\end{Beispiel}
+
+Man könnte sich die Fragen stellen, wie Dichtefunktionen denn graphisch aussehen. Dazu kann man die folgende Methode verwenden.
+
+\begin{Code}{(\lstinline|plot_density|)}
+\hypertarget{Code:PlotDensity}{}Da die Dichten von finiten und diskreten Zufallsvariablen Funktion von diskreten Mengen nach $[0, \infty)$ sind und die Dichten von stetigen Zufallsvariablen von $\mathbb{R}$ nach $[0, \infty)$ abbilden, müssen wir hier die Typen wieder Unterscheiden. Einige Teile des Codes werden für alle Typen verwendet und daher nur für finite Zufallsvariablen beschrieben.
+\begin{enumerate}[label=(\roman*)]
+\item Für finite Zufallsvariablen gilt
+\begin{lstlisting}
+def plot_density(self, show=True, use_latex=True):
+    if self._test_for_symbols():
+        return
+    x_values = list(self.density.keys())
+    y_values = list(self.density.values())
+    if use_latex:
+        plt.rc('text', usetex=True)
+    fig, ax = plt.subplots()
+    ax.set_xlabel(f'${sym.latex(self.variable)}$')
+    ax.set_ylabel('Density function')
+    ax.scatter(x_values, y_values, marker='.')
+    if show:
+        plt.show()
+    else:
+        return fig, ax
+\end{lstlisting}
+
+Die Methode \lstinline|_test_for_symbols| untersucht eine Dichte, ob mehr Symbole verwendet wurden, als das Symbol für \lstinline|self.variable|. Solche Dichten können wir nicht plotten, da in diesen Funktionen mindestens ein Parameter zu viel auftaucht.
+
+\newpage
+
+Die $x$- und $y$-Werte für den Plot sind die Keys und Values aus dem Dichte-Dictionary. Diese werden als Punkte mit \lstinline|scatter| im Plot verteilt. Das Argument \lstinline|use_latex| verwendet für die Beschriftungen des Plots \LaTeX{}. Mit dem Argument \lstinline|show| kann man sich entweder den Plot direkt anzeigen lassen oder die beiden matplotlib-Objekte \lstinline|fig| und \lstinline|ax| zurückgeben lassen, um noch eigene Änderungen, wie zum Beispiel das Hinzufügen eines Titels, vorzunehmen.
+
+\item Für diskrete Zufallsvariablen gilt
+\begin{lstlisting}
+def plot_density(self, lower=0, upper=10, show=True, use_latex=True):
+    if self._test_for_symbols():
+        return
+    x_values = np.arange(lower, upper + 1, step=1, dtype=int)
+    y_values = []
+    for x_value in x_values:
+        if x_value >= self.supp[0] and x_value <= self.supp[1]:
+            y_value = float(self.density.subs(self.variable, x_value).evalf())
+        else:
+            y_value = 0
+        y_values.append(y_value)
+    if use_latex:
+        plt.rc('text', usetex=True)
+    fig, ax = plt.subplots()
+    ax.set_xlabel(f'${sym.latex(self.variable)}$')
+    ax.set_ylabel('Density function')
+    ax.scatter(x_values, y_values, marker='.')
+    if show:
+        plt.show()
+    else:
+        return fig, ax
+\end{lstlisting}
+Anders als bei finiten Zufallsvariablen gibt es hier die Argumente \lstinline|lower| und \lstinline|upper|, welche die untere beziehungsweise obere Grenze, für die man die Dichte plotten möchte, angeben. Zuerst wird mit NumPy ein Array mit den ganzzahligen Werten zwischen den angegebenen Grenzen erzeugt. Um zu diesen $x$-Werten die $y$-Werte zu bestimmen wird mittels einer Schleife zuerst überprüft, ob die Dichte dort überhaupt Werte annimmt oder null ist. Werden nicht-verschwindende Werte angenommen, so wird der $x$-Wert in die Dichtefunktion eingesetzt, mittels SymPy evaluiert und anschließend in eine Python-Gleitkommazahl umgewandelt. Wie für finite Zufallsvariablen werden diese dann als Punkte im Plot verteilt.
+
+\item Für stetige Zufallsvariablen gilt
+\begin{lstlisting}
+def plot_density(self, lower=-5, upper=5, numpoints=100, show=True, use_latex=True):
+    if self._test_for_symbols():
+        return
+    x_values = np.linspace(lower, upper, num=numpoints)
+    y_values = []
+    for x_value in x_values:
+        if x_value > self.supp[0] and x_value < self.supp[1]:
+            y_value = float(self.density.subs(self.variable, x_value).evalf())
+        else:
+            y_value = 0
+        y_values.append(y_value)
+    if use_latex:
+        plt.rc('text', usetex=True)
+    fig, ax = plt.subplots()
+    ax.set_xlabel(f'${sym.latex(self.variable)}$')
+    ax.set_ylabel('Density function')
+    ax.plot(x_values, y_values)
+    if show:
+        plt.show()
+    else:
+        return fig, ax
+\end{lstlisting}
+Neben den Argumenten für die obere und untere Grenze gibt es nun das Argument \lstinline|numpoints|, mit welchem man die Anzahl der berechneten Punkte verändern kann. Die $x$-Werte werden ähnlich wie bei den diskreten Zufallsvariablen mit NumPy bestimmt. Die Werte der Dichtefunktion werden anschließend wie oben durch Einsetzen bestimmt. Der einzige Unterschied ist, dass sie nicht mehr als Punkte geplottet werden, sondern mit \lstinline|plot| verbunden werden.
+\end{enumerate}
+An dieser Stelle sei erwähnt, dass dieser Code nicht sonderlich effizient ist, da die Auswertungen der Dichtefunktionen in SymPy stattfinden und SymPy diese Berechnungen nicht vektorisiert. Es gäbe die Möglichkeit SymPy-Ausdrücke mit \lstinline|lambdify| in Ausdrücke zu verwandeln, die mit NumPy vektorisiert werden können. Dabei ergibt sich das Problem, dass es Funktionen in SymPy gibt, die in NumPy nicht existieren und dies führt dann zu Fehlern.
+\end{Code}
+
+Wir können nun versuchen, die Dichten einiger Zufallsvariablen zu visualisieren.
+
+\begin{Beispiel}{(Plots von Dichten)}
+\hypertarget{Bsp:DichteBild}{}Zur Visualisierung verwenden wir die Zufallsvariablen aus \hyperlink{Bsp:Erstellung}{\blue{obigem Beispiel}}.
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X \sim \Ber(4/7)$. Wir verwenden
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+n = sym.Symbol('n', integer=True, nonnegative=True)
+p = sym.Rational(4, 7)
+density = {1: p, 0: 1 - p}
+rv = RandomVariableFinite(density, n)
+rv.plot_density()
+\end{lstlisting}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{./Section/Grundlegende Begriffe/Dichte Bernoulli.png}
+\caption{Dichte einer $\Ber(4/7)$-Verteilung}
+\end{figure}
+Wir können diesen Plot auch modifizieren. Mittels
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=6]
+fig, ax = rv.plot_density(show=False)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_position('zero')
+ax.spines['left'].set_position('zero')
+ax.set_ylim(0)
+ax.set_xticks([0, 1])
+ax.set_yticks([3/7, 4/7], [r'$\frac{3}{7}$', r'$\frac{4}{7}$'])
+plt.savefig('Dichte Bernoulli 2.png', dpi=300)
+\end{lstlisting}
+
+\newpage
+
+erhalten wir
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{./Section/Grundlegende Begriffe/Dichte Bernoulli 2.png}
+\caption{Dichte einer $\Ber(4/7)$-Verteilung}
+\end{figure}
+
+\item Sei $X \sim \Bin(8, 2/3)$. Wir verwenden
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+k = sym.symbols('k', integer=True, nonnegative=True)
+n = sym.Integer(8)
+p = sym.Rational(2, 3)
+density = sym.binomial(n, k) * p**k * (1 - p)**(n - k)
+rv = RandomVariableDiscrete(density, k)
+rv.plot_density()
+\end{lstlisting}
+und erhalten
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{./Section/Grundlegende Begriffe/Dichte Binomial.png}
+\caption{Dichte einer $\Bin(8, 2/3)$-Verteilung}
+\end{figure}
+Dieser Plot ließe sich auch entsprechend verändern, worauf wir an dieser Stelle aber verzichten wollen.
+
+\item Sei $X \sim \Nor(0, 1)$. Wir verwenden
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+mu = sym.Integer(0)
+sigma = sym.Integer(1)
+x = sym.symbols('x', real=True)
+density = 1 / (sigma * sym.sqrt(2 * sym.pi)) * sym.exp(- (x - mu)**2 / (2 * sigma**2))
+rv = RandomVariableContinuous(density, x)
+rv.plot_density()
+\end{lstlisting}
+und erhalten
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{./Section/Grundlegende Begriffe/Dichte Normal.png}
+\caption{Dichte einer $\Nor(0, 1)$-Verteilung}
+\end{figure}
+
+\item Sei $X \sim \Exp(3)$. Diesen Plot wollen wir gleich etwas bearbeiten.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+lamda = sym.Integer(3)
+x = sym.symbols('x', real=True)
+density = lamda * sym.exp(- lamda * x)
+rv = RandomVariableContinuous(density, x, [sym.Integer(0), sym.oo])
+fig, ax = rv.plot_density(numpoints=1000, show=False)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_position('zero')
+ax.spines['left'].set_position('zero')
+ax.set_xlim(-1, 4)
+ax.set_ylim(0)
+plt.show()
+\end{lstlisting}
+Wir erhalten
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{./Section/Grundlegende Begriffe/Dichte Exponential.png}
+\caption{Dichte einer $\Exp(3)$-Verteilung}
+\end{figure}
+\end{enumerate}
+An dieser Stelle sei erwähnt, dass die Senkrechte um die Null mathematisch nicht schön ist. Die Dichte macht an dieser Stelle einen Sprung und diese Unterscheidung wäre in matplotlib theoretisch möglich, hätte aber zu einer unnötigen Spaghettifizierung des Codes geführt.
+\end{Beispiel}
+
+\newpage
+
+Wir werden nun einen Satz betrachten und beweisen, mit dem wir Funktionen bezüglich des Bildmaßes integrieren können.
+
+\begin{Satz}{(Maß und Bildmaß)}
+\hypertarget{Satz:Maß_und_Bildmaß}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Weiter sei $f: \mathbb{R} \rightarrow \mathbb{R}$ eine messbare Funktion, so dass $f \circ X: \Omega \rightarrow \mathbb{R}$ $\mathbb{P}$-integrierbar ist. Dann gilt
+\[\int f \d \mathbb{P}_X = \int f \circ X \d \mathbb{P}~.\]
+\end{Satz}
+
+\begin{Beweis}{}
+Wir beweisen diesen Satz mittels algebraischer Induktion. Sei $B \in \mathscr{B}$ und $\indi_B$ die zugehörige Indikatorfunktion. Betrachte zunächst für $\omega \in \Omega$
+\[\indi_B \circ X(\omega) = 1 \Leftrightarrow X(\omega) \in B \Leftrightarrow \omega \in X^{-1}(B)~.\]
+Also gilt
+\[\indi_B \circ X = \indi_{X^{-1}(B)}~.\]
+Betrachte nun
+\begin{align*}
+\int \indi_B \d \mathbb{P}_X &= \int_B \d \mathbb{P}_X\\
+&= \mathbb{P}_X(B)\\
+&= \mathbb{P}(X^{-1}(B))\\
+&= \int_{X^{-1}(B)} \d \mathbb{P}\\
+&= \int \indi_{X^{-1}(B)} \d \mathbb{P}\\
+&= \int \indi_B \circ X \d \mathbb{P}~.
+\end{align*}
+Sei nun $f$ eine Linearkombination von Indikatorfunktionen mit $(B_n)_{n \in \mathbb{N}_0} \subset \mathscr{B}$ und $(a_n)_{n \in \mathbb{N}_0} \subset \mathbb{R}$. Dann gilt dank Linearität des Integrals
+\begin{align*}
+\int \sum_{n \in \mathbb{N}_0} a_n \indi_{B_n} \d \mathbb{P}_X &= \sum_{n \in \mathbb{N}_0} a_n \int \indi_{B_n} \d \mathbb{P}_X~.
+\intertext{Da dies nur Indikatorfunktionen sind, gilt nach dem ersten Schritt}
+&= \sum_{n \in \mathbb{N}_0} a_n \int \indi_{B_n} \circ X \d \mathbb{P}\\
+&= \int \sum_{n \in \mathbb{N}_0} a_n \indi_{B_n} \circ X \d \mathbb{P}~.
+\end{align*}
+Sei $f$ nun eine positive, messbare Funktion. Dann existiert eine monoton steigende Folge $(f_n)_{n \in \mathbb{N}_0}$ von Linearkombination von Indikatorfunktionen mit $\lim_{n \rightarrow \infty} f_n = f$. Dann gilt
+\begin{align*}
+\int f \d \mathbb{P}_X &= \int \lim_{n \rightarrow \infty} f_n \d \mathbb{P}_X~.
+\intertext{Dank dem Satz von Lebesgue lassen sich Limes und Integration vertauschen und es gilt}
+&= \lim_{n \rightarrow \infty} \int f_n \d \mathbb{P}_X~.
+\intertext{Da dies Linearkombination von Indikatorfunktionen sind, gilt nach obigem}
+&= \lim_{n \rightarrow \infty} \int f_n \circ X \d \mathbb{P}~.
+\intertext{Nochmaliges Anwenden des Satzes von Lebesgue liefert}
+&= \int \lim_{n \rightarrow \infty} f_n \circ X \d \mathbb{P}\\
+&= \int f \circ X \d \mathbb{P}~.
+\end{align*}
+Sei nun $f$ nur noch eine messbare Funktion. Dann gibt es positive, messbare Funktion $f^+$ und $f^-$ mit $f = f^+ - f^+$ und es gilt
+\begin{align*}
+\int f \d \mathbb{P}_X &= \int f^+ - f^+ \d \mathbb{P}_X\\
+&= \int f^+ \d \mathbb{P}_X - \int f^- \d \mathbb{P}_X~.
+\intertext{Da dies positive messbare Funktionen sind, folgt dank obigem}
+&= \int f^+ \circ X \d \mathbb{P} - \int f^- \circ X \d \mathbb{P}\\
+&= \int f^+ \circ X - f^- \circ X \d \mathbb{P}\\
+&= \int (f^+ - f^+) \circ X \d \mathbb{P}\\
+&= \int f \circ X \d \mathbb{P}~.
+\end{align*}
+Die Aussage gilt somit für alle messbaren Funktionen und wir sind fertig.
+\end{Beweis}
+\vspace*{\baselineskip}
+
+Nun werden wir einen Satz beweisen, der es uns erlaubt Funktionen, die wir bezüglich des Bildmaßes integrieren wollen auf einem einfacheren Wege mithilfe der Dichtefunktion zu integrieren.
+
+\begin{Satz}{(Dichtesatz)}
+\hypertarget{Satz:Dichtesatz}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable mit Lebesgue-Dichte $\varphi$. Weiter sei $f: \mathbb{R} \rightarrow \mathbb{R}$ eine Funktion, sodass $f \cdot \varphi$ $\lambda$-integrierbar ist. Dann gilt
+\[\int f \d \mathbb{P}_X = \int f \varphi \d \lambda~.\] 
+Eine analoge Aussage gilt für das Zählmaß.
+\end{Satz}
+
+\begin{Beweis}{}
+Wir beweisen diesen Satz mittels algebraischer Induktion. Sei $B \in \mathscr{B}$ und $\indi_B$ die zugehörige Indikatorfunktion. Betrachte
+\begin{align*}
+\int \indi_B \d \mathbb{P}_X &= \mathbb{P}_X(B)~.
+\intertext{Da $\varphi$ eine $\lambda$-Dichte des Maßes $\mathbb{P}_X$ ist, folgt direkt aus der \hyperlink{Def:Dichtefunktion}{\blue{Definition der Dichtefunktion}}}
+&= \int \indi_B \varphi \d \lambda~.
+\end{align*}
+Sei nun $f$ eine Linearkombination von Indikatorfunktionen mit $(B_n)_{n \in \mathbb{N}_0} \subset \mathscr{B}$ und $(a_n)_{n \in \mathbb{N}_0} \subset \mathbb{R}$. Dann gilt dank Linearität des Integrals
+\begin{align*}
+\int \sum_{n \in \mathbb{N}_0} a_n \indi_{B_n} \d \mathbb{P}_X &= \sum_{n \in \mathbb{N}_0} a_n \int \indi_{B_n} \d \mathbb{P}_X~.
+\intertext{Da dies nur Indikatorfunktionen sind, gilt nach dem ersten Schritt}
+&= \sum_{n \in \mathbb{N}_0} a_n \int \indi_{B_n} \varphi \d \lambda\\
+&= \int \sum_{n \in \mathbb{N}_0} a_n \indi_{B_n} \varphi \d \lambda\\
+&= \int \left( \sum_{n \in \mathbb{N}_0} a_n \indi_{B_n} \right) \varphi \d \lambda~.
+\end{align*}
+Sei $f$ nun eine positive, messbare Funktion. Dann existiert eine monoton steigende Folge $(f_n)_{n \in \mathbb{N}_0}$ von Linearkombinationen von Indikatorfunktionen mit $\lim_{n \rightarrow \infty} f_n = f$. Dann gilt
+\begin{align*}
+\int f \d \mathbb{P}_x &= \int \lim_{n \rightarrow \infty} f_n \d \mathbb{P}_X~.
+\intertext{Dank dem Satz von Lebesgue lassen sich Limes und Integration vertauschen und es gilt}
+&= \lim_{n \rightarrow \infty} \int f_n \d \mathbb{P}_X~.
+\intertext{Da dies Linearkombinationen von Indikatorfunktionen sind, gilt nach obigem}
+&= \lim_{n \rightarrow \infty} \int f_n \varphi \d \lambda~.
+\intertext{Nochmaliges Anwenden des Satzes von Lebesgue liefert}
+&= \int \lim_{n \rightarrow \infty} f_n \varphi \d \lambda\\
+&= \int f \varphi \d \lambda~.
+\end{align*}
+Sei nun $f$ nur noch eine messbare Funktion. Dann gibt es positive, messbare Funktion $f^+$ und $f^-$ mit $f = f^+ - f^+$ und es gilt
+\begin{align*}
+\int f \d \mathbb{P}_X &= \int f^+ - f^- \d \mathbb{P}_X\\
+&= \int f^+ \d \mathbb{P}_X - \int f^- \d \mathbb{P}_X~.
+\intertext{Da dies positive messbare Funktionen sind, folgt dank obigem}
+&= \int f^+ \varphi \d \lambda - \int f^- \varphi \d \lambda\\
+&= \int f^+ \varphi - f^- \varphi \d \lambda\\
+&= \int \left( f^+ - f^- \right) \varphi \d \lambda\\
+&= \int f \varphi \d \lambda~.
+\end{align*}
+Die Aussage gilt somit für alle messbaren Funktionen und wir sind fertig.
+\end{Beweis}
+\vspace*{\baselineskip}
+
+\newpage
+
+Die Kombination dieser beiden Sätze liefert das folgende Korollar. Dies liefert uns eine einfach Möglichkeit Maßintegrale mit bekannten Werkzeugen zu Riemann- beziehungsweise Lebesgue-Integralen und Reihen zu berechnen.
+
+\begin{Korollar}{(Dichtekorollar)}
+\hypertarget{Kor:Dichtekorollar}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable mit Lebesgue-Dichte $\varphi$. Weiter sei $f: \mathbb{R} \rightarrow \mathbb{R}$ eine messbare Funktion, so dass $f \circ X: \Omega \rightarrow \mathbb{R}$ $\mathbb{P}$-integrierbar und $f \cdot \varphi$ $\lambda$-integrierbar ist. Dann gilt
+\[\int f \circ X \d \mathbb{P} = \int f \varphi \d \lambda~.\]
+Eine analoge Aussage gilt für das Zählmaß.
+\end{Korollar}
+
+\begin{Beweis}{}
+Wir verbinden die Aussagen der vorangegangenen Sätze. Betrachte mit dem \hyperlink{Satz:Maß_und_Bildmaß}{\blue{Satz von Maß und Bildmaß}}
+\begin{align*}
+\int f \circ X \d \mathbb{P} &= \int f \d \mathbb{P}_X\\
+&= \int f \varphi \d \lambda~,
+\end{align*}
+dank dem gerade bewiesenen \hyperlink{Satz:Dichtesatz}{\blue{Dichtesatz}}.
+\end{Beweis}
+%\vspace*{\baselineskip}
+
+\begin{Bemerkung}{(Dichtekorollar Summenform)}
+Wir können das obige \hyperlink{Kor:Dichtekorollar}{\blue{Dichtkorollar}} in die Form für diskrete Zufallsvariablen schreiben. Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine diskrete Zufallsvariable mit Zähldichte $\varphi$. Dann gilt für $f : \mathbb{N}_0 \rightarrow \mathbb{R}$
+\begin{align*}
+\int f \circ X \d \mathbb{P} &= \int f \varphi \d \#\\
+&= \sum_{n \in \mathbb{N}_0} f(n) \varphi(n)~.
+\end{align*}
+Analog gilt dies auch für finite Zufallsvariablen.\\
+
+Sei $X$ nun eine stetige Zufallsvariable mit Dichte $\varphi$. Ist $f \varphi$ für stetige Zufallsvariablen sogar Riemann-integrierbar, so können wir die Integrale wie gewohnt mit dem Hauptsatz berechnen. Diese Voraussetzung nehmen wir im Folgenden häufig implizit an.
+\end{Bemerkung}
+
+Wollen wir also die Funktion einer Zufallsvariable bezüglich des Wahrscheinlichkeitsmaßes $\mathbb{P}$ berechnen, so genügt es entsprechende Lebesgue-Integral oder die Summe zu berechnen, falls diese existiert. Wir können nun eine Methode definieren, die genau dieses Korollar anwendet.
+
+\begin{Code}{(\lstinline|integrate_random_variable|)}
+\hypertarget{Code:Integrate}{}Ziel dieser Methode ist es Integrale von $f(X)$ zu bestimmen. Sei  $X$ eine reelle Zufallsvariable mit Dichte $\varphi$ und $f$ eine Funktion, die wir mit \lstinline|expr| bezeichnen. Da sich das Zähl- und Lebesgue-Maß grundlegend in ihrer Berechnung unterscheiden, ist diese Methode für jeden Typ von Zufallsvariable separat definiert.
+\begin{enumerate}[label=(\roman*)]
+\item Für finite Zufallsvariablen gilt
+\begin{lstlisting}
+def integrate_random_variable(self, expr, lower=-sym.oo, upper=sym.oo):
+    integral = sym.Integer(0)
+    for key in self.density.keys():
+        if key >= lower and key <= upper:
+            integral += expr.subs(self.variable, key) * self.density[key]
+    integral = sym.simplify(integral)
+    return integral
+\end{lstlisting}
+
+\newpage
+
+Wir lassen hier untere und obere Grenzen für die Summation zu, welche standardmäßig $- \infty$ und $\infty$ sind. Da die Dichte einer finiten Zufallsvariable aus einem Dictionary besteht, können wir über deren Schlüssel iterieren. Ist der Schlüssel innerhalb des Integrationsintervalls, ersetzen wir mithilfe der \lstinline|subs|-Methode in jeder Iteration die Variable der Funktion durch den entsprechenden Schlüssel und multiplizieren dies mit der Wahrscheinlichkeit diesen Wert zu erhalten, was \lstinline|self.density[key]| entspricht. Zuletzt lassen wir SymPy diesen Ausdruck vereinfachen und anschließend ausgeben.
+
+\item Für diskrete Zufallsvariablen gilt
+\begin{lstlisting}
+def integrate_random_variable(self, expr, lower=sym.Integer(0), upper=sym.oo):
+    lower = sym.Max(lower, self.supp[0])
+    upper = sym.Min(upper, self.supp[1])
+    integral = sym.summation(expr * self.density, (self.variable, lower, upper)).doit()
+    integral = RandomVariable.clean_piecewise(integral)
+    integral = sym.simplify(integral)
+    return integral
+\end{lstlisting}
+Wir lassen hier untere und obere Grenzen für die Summation zu, welche standardmäßig $0$ und $\infty$ sind. Diese Summationsgrenzen werden dann noch mit den Grenzen für die Werte der Zufallsvariable verarbeitet. Mithilfe von SymPy bilden wir die Summe aus Funktion und Dichte  und summieren von der unteren bis zur oberen Grenze. Als nächstes wird aus der Hauptklasse die \lstinline|clean_piecewise|-Funktion aufgerufen. Diese überprüft einen Ausdruck, ob dieser zur SymPy \lstinline|Piecewise|-Klasse gehört. Dies ist das SymPy Objekt für stückweise definiert Funktionen. Ist der Ausdruck aus dieser Klasse, so nimmt die Funktion immer den ersten Zweig dieser Funktion, da dieser meist das gesuchte Ergebnis ist und gibt eine Warnung in der Konsole aus. Sollte man nicht wollen, dass stückweise Funktionen gekürzt werden, so kann man die \lstinline|no_chopping|-Funktion aufrufen. Es ist zu beachten, dass dann die meisten Funktionen nicht mehr funktionieren, da SymPy mit stückweisen Funktionen nicht richtig weiterrechnen kann. Zum Schluss wird wieder versucht das Ergebnis zu vereinfachen.
+
+\item Für stetige Zufallsvariablen gilt
+\begin{lstlisting}
+def integrate_random_variable(self, expr, lower=-sym.oo, upper=sym.oo):
+    lower = sym.Max(lower, self.supp[0])
+    upper = sym.Min(upper, self.supp[1])
+    integral = sym.integrate(expr * self.density, (self.variable, lower, upper)).doit()
+    integral = RandomVariable.clean_piecewise(integral)
+    integral = sym.simplify(integral)
+    return integral
+\end{lstlisting}
+Wir lassen auch hier obere und untere Grenzen zu, welche standardmäßig auf $\infty$ und $- \infty$ gesetzt werden. Da wir für die Dichten von stetigen Zufallsvariablen die Indikatorfunktionen weggelassen haben, müssen wir diese in einem ersten Schritt mit dem Träger der Dichte vergleichen. Anschließend integrieren wir mit SymPy das Produkt aus Funktion und Dichte von der unteren zur oberen Grenze. Nach der Entfernung von stückweisen Funktionen wird dies wieder vereinfacht und ausgegeben.
+\end{enumerate}
+
+Der besonders elegante Teil besteht darin, dass wir in der Aufforderung für die Berechnung quasi die maßtheoretische Integration einer Zufallsvariable verwenden können, da der Code das Dichtekorollar automatisch anwendet und die Dichtefunktion dazu multipliziert.
+\end{Code}
+
+\newpage
+
+Wir können nun versuchen mit der obigen Methode eine Funktion einer Zufallsvariable zu integrieren.
+
+\begin{Beispiel}{(Funktionen von Zufallsvariablen)}
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X$ eine finite Zufallsvariable mit
+\begin{align*}
+\mathbb{P}(X = 1) &= p\\
+\mathbb{P}(X = 2) &= q\\
+\mathbb{P}(X = 3) &= 1 - p - q\\
+\end{align*}
+mit $p, q \in (0, 1)$. Wir berechnen nun mit $E = \{ 1, 2, 3 \}$
+\begin{align*}
+\int X^2 + 2 X \d \mathbb{P} &= \sum_{n \in E} (n^2 + 2 n) \mathbb{P}(X = n)\\
+&= (1^2 + 2 \cdot 1) \mathbb{P}(X = 1) + (2^2 + 2 \cdot 2) \mathbb{P}(X = 2) + (3^2 + 2 \cdot 3) \mathbb{P}(X = 3)\\
+&= (1 + 2) p + (4 + 4) q + (9 + 6) (1 - p - q)\\
+&= 3 p + 8 q + 15 - 15 p - 15 q\\
+&= 15 - 12 p - 7 q
+\end{align*}
+Dies können wir nun folgendermaßen mit der oben definierten Funktion berechnen lassen.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+n = sym.Symbol('n', integer=True, positive=True)
+p, q = sym.symbols('p, q', real=True, positive=True)
+density = {1: p, 2: q, 3: 1 - p - q}
+rv = RandomVariableFinite(density, n)
+polynom = rv.integrate_random_variable(n**2 + 2 * n)
+\end{lstlisting}
+Als Ergebnis erhalten wir \lstinline|-12*p - 7*q + 15|.
+
+\item Sei $X \sim \Exp(\lambda)$ mit $\lambda > 0$ exponentialverteilt. Betrachte nun mit dem \hyperlink{Kor:Dichtekorollar}{\blue{Dichtekorollar}}
+\begin{align*}
+\int \sin(X) \d \mathbb{P} &= \int_{-\infty}^\infty \sin(x) \lambda \exp(- \lambda x) \indi_{[0, \infty)}(x) \d x\\
+&= \lambda \int_0^\infty \sin(x) \exp(- \lambda x) \d x~.
+\end{align*}
+Weiter betrachten wir das Integral
+\begin{align*}
+\alpha &= \int_0^\infty \sin(x) \exp(- \lambda x) \d x
+\intertext{Mit partieller Integration erhalten wir}
+&= \left[ \frac{1}{\lambda} \sin(x) \exp(- \lambda x) \right]_0^\infty + \frac{1}{\lambda} \int_0^\infty \cos(x) \exp(- \lambda x) \d x\\
+&= \left[ 0 - 0 \right] + \frac{1}{\lambda} \int_0^\infty \cos(x) \exp(- \lambda x) \d x\\
+&= \frac{1}{\lambda} \int_0^\infty \cos(x) \exp(- \lambda x) \d x~.
+\displaybreak
+\intertext{Nochmal partielle Integration liefert}
+&= \left[ - \frac{1}{\lambda^2} \cos \exp(- \lambda x) \right]_0^\infty - \frac{1}{\lambda^2} \int_0^\infty \sin(x) \exp(- \lambda x) \d x\\
+&= \left[ - 0 + \frac{1}{\lambda^2} \right] - \frac{1}{\lambda^2} \int_0^\infty \sin(x) \exp(- \lambda x) \d x\\
+&= \frac{1}{\lambda^2} - \frac{1}{\lambda^2} \alpha~.
+\end{align*}
+Zusammengefasst ist also
+\begin{align*}
+\alpha &= \frac{1}{\lambda^2} - \frac{1}{\lambda^2} \alpha~.
+\intertext{Umformen liefert}
+(\lambda^2 + 1) \alpha &= 1\\
+\alpha &= \frac{1}{\lambda^2 + 1}~.
+\end{align*}
+Damit ist dann insgesamt
+\[\int \sin(X) \d \mathbb{P} = \frac{\lambda}{\lambda^2 + 1}~.\]
+Dies können wir folgendermaßen berechnen lassen
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+lamda = sym.Symbol('lambda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * x)
+rv = RandomVariableContinuous(density, x, [sym.Integer(0), sym.oo])
+sine = rv.integrate_random_variable(sym.sin(x))
+\end{lstlisting}
+Wir erhalten analog \lstinline|lambda/(lambda**2 + 1)|.
+
+\item Sei $X \sim \Nor(0, 1)$ standardnormalverteilt. Wir können mit dieser Methode beispielsweise
+\[\int \log(X) \d \mathbb{P}\]
+berechnen. Es ist zu beachten, dass $\log$ den natürlichen Logarithmus bezeichnet.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+density = 1 / sym.sqrt(2 * sym.pi) * sym.exp(- x**2 / 2)
+rv = RandomVariableContinuous(density, x)
+natural_logarithm = rv.integrate_random_variable(sym.log(x))
+\end{lstlisting}
+Wir erhalten
+\begin{align*}
+\int \log(X) \d \mathbb{P} &= - \frac{\log{\left(2 \right)}}{2} - \frac{\gamma}{2} + \frac{i \pi}{2}\\
+&= \frac{1}{2} \left( - \log(2) - \gamma + i \pi \right)~.
+\end{align*}
+Dies ist ein sehr interessantes Ergebnis, da hier einige wichtige mathematische Konstanten auftauchen. Die eulersche Zahl $e$ implizit im natürliche Logarithmus von $2$, die Euler–Mascheroni-Konstante $\gamma$, die komplexe Einheit $i$ und die Kreiszahl $\pi$. Dies können wir leider nicht auf elementare Weise nachrechnen.
+\end{enumerate}
+Wir werden später in vielen Funktionen diese \lstinline|integrate_random_variable|-Methode benötigen.
+\end{Beispiel}
+
+\newpage
+
+Mit dieser Integrationsmethode können wir nun die \lstinline|_is_density|-Methode definieren, welche bei der \hyperlink{Code:Initialisierung}{\blue{Initialisierung einer Zufallsvariable}} aufgerufen wird.
+
+\begin{Code}{(\lstinline|_is_density|)}
+Mit dieser Methode überprüfen wir, ob die Wahrscheinlichkeit des gesamten Raumes gleich eins ist. Dies ist folgendermaßen implementiert
+\begin{lstlisting}
+def _is_density(self):
+    total = self.integrate_random_variable(sym.Integer(1))
+    if not total.equals(sym.Integer(1)):
+        print('WARNING: Density not standardized!')
+    return total
+\end{lstlisting}
+Mithilfe der gerade definieren Integrationsmethode wird über die Einsfunktion integriert. Wir bilden also im stetigen Fall
+\begin{align*}
+\int_\mathbb{R} 1 \varphi(x) \d x &= \int_\mathbb{R} \varphi(x)  \d x\\
+&= \mathbb{P}_X(\mathbb{R})~.
+\end{align*}
+Für ein Wahrscheinlichkeitsmaß war dies nach \hyperlink{Def:Maß}{\blue{Definition}} eins. Streng genommen müssten wir noch nachrechnen, dass die Dichtefunktion überall nicht-negativ ist. Hierfür gibt es leider keine einfache und effiziente Methode, weshalb diese Überprüfung nicht stattfindet. Diese Methode dient allgemein nur dazu, dem Nutzer offensichtliche Fehler bei der Eingabe der Dichte mitzuteilen. Ist die Dichte nicht normiert, so wird eine entsprechende Warnung in der Konsole ausgegeben. Sollte man diese Überprüfung unterdrücken wollen, so muss man bei der Definition der Zufallsvariable zusätzlich \lstinline|force_denisty=True| übergeben, was die gesamte Überprüfung überspringt. Hier wurde bewusst kein Python-Fehler verwendet. Dieser würde das Programm sofort beenden und es gibt leider Zufallsvariablen, deren Dichten SymPy nicht zu eins vereinfachen kann. Sei dazu $X \sim \Log(p)$ mit $p \in (0, 1)$ logarithmischverteilt. Die Dichte ist gegeben durch
+\[\varphi(n) = - \frac{p^n}{n} \frac{1}{\log(1 - p)}\]
+für alle $n \in \mathbb{N}$. Wir können daraus nun ein \lstinline|RandomVariable|-Objekt machen.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+p = sym.Symbol('p', real=True, positive=True)
+n = sym.Symbol('n', integer=True, nonnegative=True)
+density = - p**n / n * 1 / sym.log(1 - p)
+rv = RandomVariableDiscrete(density, n, supp=[sym.Integer(1), sym.oo])
+\end{lstlisting}
+Wir erhalten nun die Meldung \lstinline|WARNING: Density not standardized!|. Dies liegt vermutlich daran, dass SymPy die Summe nicht zusammenfassen möchte, da wir nicht festlegen können, dass $p < 1$ ist.
+\end{Code}
+
+Da uns Dichtefunktionen die Arbeit erleichtern, wollen wir nun allgemein wissen, wann eine solche Funktion existiert. Für diesen zentralen Satz der Maßtheorie benötigen wir zunächst die folgende
+
+\begin{Definition}{(Nullmenge)}
+Sei $(\Omega, \mathscr{A}, \mu)$ ein Maßraum und $A \in \mathscr{A}$ eine Menge. Gilt
+\[\mu(A) = 0~,\]
+so ist $A$ eine \textit{$\mu$-Nullmenge} oder nur \textit{Nullmenge}.
+\end{Definition}
+
+\newpage
+
+Nun können wir einige typische Beispiele für Nullmengen betrachten.
+
+\begin{Beispiel}{(Nullmenge)}
+\hypertarget{Bsp:Nullmenge}{}
+\begin{enumerate}[label=(\roman*)]
+\item Betrachten wir $(\Omega, \mathscr{A}, \delta_{\{\omega\}})$ mit einem $\omega \in \Omega$, so ist jede Menge $A \in \mathscr{A}$ mit $\omega \notin A$ eine $\delta_{\{\omega\}}$-Nullmenge.
+
+\item Betrachten wir $(\mathbb{R}, \mathscr{B}, \lambda)$, so ist jede Einpunktmenge eine Nullmenge. Sei dazu $x \in \mathbb{R}$. Dann gilt
+\begin{align*}
+\lambda(\{x\}) &= \lambda([x, x])\\
+&= x - x\\
+&= 0~.
+\end{align*}
+
+\item Betrachte wieder $(\mathbb{R}, \mathscr{B}, \lambda)$. Dann ist jede abzählbare Menge eine Nullmenge. Sei nun $A = \{ x_n \in \Omega \mid n \in \mathbb{N}_0 \}$. Dann gilt
+\begin{align*}
+\lambda(A) &= \lambda\left( \bigsqcup_{n \in \mathbb{N}_0} \{x_n\} \right)~.
+\intertext{Aufgrund der $\sigma$-Additivität gilt}
+&= \sum_{n \in \mathbb{N}_0} \lambda (\{x_n\})~.
+\intertext{Nach (ii) sind dies Nullmenge, womit gilt}
+&= \sum_{n \in \mathbb{N}_0} 0\\
+&= 0~.
+\end{align*}
+Insbesondere sind $\mathbb{N}$, $\mathbb{Z}$ und $\mathbb{Q}$ Lebesgue-Nullmengen.
+\end{enumerate}
+\end{Beispiel}
+
+\vspace*{-0.75\baselineskip}
+
+\begin{Definition}{(Absolute Stetigkeit)}
+Seien $\mu$ und $\nu$ Maße auf $(\Omega, \mathscr{A})$. Gilt für alle $A \in \mathscr{A}$ mit $\mu(A) = 0$ auch $\nu(A) = 0$, so ist $\nu$ \textit{absolutstetig} bezüglich $\mu$ und wir schreiben $\nu \ll \mu$.
+\end{Definition}
+
+Mithilfe dieser Definitionen können wir nun den folgenden Satz formulieren, der uns dabei hilft, verstehen zu können, wann Dichten existieren.
+
+\begin{Satz}{(Radon-Nikodym)}
+\hypertarget{Satz:Radon-Nikodym}{}Seien $\mu$ und $\nu$ zwei $\sigma$-endliche Maße auf $(\Omega, \mathscr{A})$. Dann sind die folgenden Aussagen äquivalent.
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $\nu$ ist absolutstetig bezüglich $\mu$.
+\item $\nu$ hat eine Dichte bezüglich $\mu$.
+\end{enumerate}
+\end{Satz}
+
+%\vspace*{-0.5\baselineskip}
+
+Dies ist ein zentraler Satz der Maß- und Wahrscheinlichkeitstheorie. Der Satz von Radon-Nikodym ist nicht nur eine Existenz-Aussage sondern er liefert uns auch eine \glqq Bauanleitung\grqq{}, wie wir eine solche Dichte finden können. Darauf wollen wir aber im Folgenden nicht weiter eingehen.
+
+\newpage
+Nun können wir einige Beispiele zur Anwendung des Satzes von Radon-Nikodym betrachten.
+
+\begin{Beispiel}{(Anwendungen Radon-Nikodym)}
+\begin{enumerate}[label=(\roman*)]
+\item Gegeben sei die Zufallsvariable $X$ aus dem \hyperlink{Bsp:Regen}{\blue{Regenbeispiel}}. Die Lebesgue-Dichte ist
+\[\varphi(x) = \indi_{[0, 1]}(x)~.\]
+Nach dem \hyperlink{Satz:Radon-Nikodym}{\blue{Satz von Radon-Nikodym}} ist das Bildmaß $\mathbb{P}_X$ absolutstetig bezüglich dem Lebesgue-Maß $\lambda$ und alle Lebesgue-Nullmengen sind auch Nullmengen bezüglich dem Bildmaß $\mathbb{P}_X$. Wir können also folgern, dass die Wahrscheinlichkeit, dass der Regentropfen auf einem bestimmten Punkt auftritt, null ist.
+
+\item Gegeben sei ein Dirac-Maß zu $x \in \mathbb{R}$. Nach dem \hyperlink{Bsp:Nullmenge}{\blue{Beispiel zu Nullmengen}} ist $\{x\}$ eine Lebesgue-Nullmenge. Da aber $\delta_{\{x\}}(\{x\}) = 1$ ist, ist $\delta_{\{x\}}$ nicht absolutstetig bezüglich $\lambda$. Aus dem \hyperlink{Satz:Radon-Nikodym}{\blue{Satz von Radon-Nikodym}} folgt, dass das Dirac-Maß keine Lebesgue-Dichte besitzen kann.
+
+\item Sei $X \sim \Ber(p)$ mit $p \in (0, 1)$. Da
+\[\mathbb{P}_X(1) = p \neq 0\]
+ist, kann $X$ nach dem \hyperlink{Satz:Radon-Nikodym}{\blue{Satz von Radon-Nikodym}} keine Lebesgue-Dichte besitzen. $X$ hat dafür eine Zähldichte.
+\end{enumerate}
+Es gibt auch Zufallsvariablen, die weder eine Lebesgue- noch eine Zähldichte besitzen.
+\end{Beispiel}
+
+Im Folgenden werden wir uns ausschließlich mit Zufallsvariablen beschäftigen, die eine Zähl- oder Lebesgue-Dichte besitzen.

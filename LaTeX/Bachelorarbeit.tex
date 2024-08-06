@@ -1,0 +1,150 @@
+\documentclass[a4paper,oneside,11pt]{scrartcl}
+\usepackage[a4paper, total={16cm, 24.7cm}]{geometry}
+%\textwidth 160mm
+%\textheight 240mm
+%\topmargin -5mm
+%\evensidemargin 0mm
+%\oddsidemargin 0mm
+%\setlength{\parindent}{0pt}
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{codegreen}{HTML}{6AAB73}
+\definecolor{codegray}{HTML}{7A7E85}
+\definecolor{codeorange}{HTML}{CF8E6D}
+\definecolor{backcolour}{rgb}{1,1,1}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegray},
+    keywordstyle=\color{codeorange},
+    stringstyle=\color{codegreen},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    language=Python,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    columns=fullflexible
+}
+\lstset{style=mystyle}
+
+\definecolor{myblue}{HTML}{0000EE}
+\newcommand{\blue}[1]{{\color{myblue}#1}}
+
+%\usepackage{biblatex}
+%\usepackage[backend=biber,style=alphabetic]{biblatex}
+%\addbibresource{Quellen.bib}
+
+\usepackage{float} %Exakte Bilder
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[figurename=Abb.]{caption}
+\usepackage{framed}
+
+\newcommand\blankpage{% comando pagina vuota
+    \clearpage
+    \begingroup
+      \null
+      \thispagestyle{empty}%
+      \addtocounter{page}{-1}%
+      \hypersetup{pageanchor=false}%
+      \clearpage
+    \endgroup
+}
+
+\usepackage[hidelinks]{hyperref} %Referenzierung
+
+\usepackage{mathrsfs} %mathscr
+\usepackage{scrlayer-scrpage}
+
+\allowdisplaybreaks
+\parindent0pt
+\pagestyle{scrheadings}
+\clearpairofpagestyles
+\usepackage{datetime}
+
+\usepackage{sectsty}
+\sectionfont{\clearpage}
+
+\usepackage{enumitem}
+\usepackage{tabularx} %Tabellen
+
+\newcounter{Zaehler}
+\newcommand{\Zahl}{\refstepcounter{Zaehler}\thesection.\theZaehler}
+
+\newenvironment{Satz}[1]{\par\medbreak\textbf{Satz \Zahl} #1\textbf{:}\itshape}{\par\medbreak}
+\newenvironment{Korollar}[1]{\par\medbreak\textbf{Korollar \Zahl} #1\textbf{:}\itshape}{\par\medbreak}
+\newenvironment{Definition}[1]{\par\medbreak\textbf{Definition \Zahl} #1\textbf{:}\itshape}{\par\medbreak}
+\newenvironment{Beispiel}[1]{\par\medbreak\textbf{Beispiel \Zahl} #1\textbf{:}}{\par\medbreak}
+\newenvironment{Bemerkung}[1]{\par\medbreak\textbf{Bemerkung \Zahl} #1\textbf{:}}{\par\medbreak}
+\newenvironment{Code}[1]{\par\medbreak\textbf{Code \Zahl} #1\textbf{:}}{\par\medbreak}
+\newenvironment{Beweis}[1]{\textit{Beweis} #1\textit{:}\\}{\hfill $\Box$}
+
+\newcommand{\tab}[1][1cm]{\hspace*{#1}}
+\renewcommand{\Im}{\operatorname{Im}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\dabs}[1]{\left\Vert #1 \right\Vert}
+\newcommand{\note}[1]{\par\fcolorbox{green}{white}{\parbox{\linewidth}{\centering #1}}}
+\newcommand{\green}[1]{{\color{green}#1}}
+\renewcommand{\d}{\mathop{}\!\mathrm{d}}
+\usepackage{dsfont}
+\newcommand{\indi}{\mathds{1}}
+\newcommand{\en}[1]{(#1)}
+\newcommand{\erf}{\operatorname{erf}}
+\newcommand{\VarK}{\operatorname{VarK}}
+
+\newcommand{\Ber}{\operatorname{Ber}}
+\newcommand{\Poiss}{\operatorname{Poiss}}
+\newcommand{\Bin}{\operatorname{Bin}}
+\newcommand{\Nor}{\operatorname{N}}
+\newcommand{\Exp}{\operatorname{Exp}}
+\newcommand{\Log}{\operatorname{Log}}
+
+\cfoot{\pagemark}
+
+\begin{document}
+\input{./Section/Titel/Titel.tex}
+
+\blankpage
+
+\tableofcontents
+\thispagestyle{empty}
+
+\blankpage
+
+\input{./Section/Anfang/Anfang.tex}
+
+\input{./Section/Einführung/Einführung.tex}
+
+\input{./Section/Grundlegende Begriffe/Grundlegende Begriffe.tex}
+
+\input{./Section/Momente/Momente.tex}
+
+\input{./Section/Simulation/Simulation.tex}
+
+\input{./Section/Ende/Ende.tex}
+
+\input{./Section/Anhang/Anhang.tex}
+
+\addcontentsline{toc}{section}{Literatur}
+\bibliographystyle{alpha}
+\bibliography{Quellen}
+\hypertarget{Sec:Bib}{}
+\end{document}

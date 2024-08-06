@@ -1,0 +1,36 @@
+\subsection*{Vorwort}
+\addcontentsline{toc}{section}{Vorwort}
+
+Zu dieser Bachelorarbeit gehören einige Python Skripts. Diese finden Sie unter
+\begin{center}
+\href{https://github.com/Blondai/Elementare-Wahrscheinlichkeitstheorie-mit-SymPy}{\blue{https://github.com/Blondai/Elementare-Wahrscheinlichkeitstheorie-mit-SymPy}}
+\end{center}
+In diesem Ordner befindet sich eine \lstinline|.whl|-Datei, welche sich mit
+\begin{lstlisting}
+pip install ProbabilityTheoryWithSymPy-1.0.0-py3-none-any.whl
+\end{lstlisting}
+wie ein normales Python-Paket installieren lässt. Mittels
+\begin{lstlisting}
+from ProbabilityTheoryWithSymPy import *
+\end{lstlisting}
+lassen sich alle Funktionalitäten importieren. Um nicht alles auf einmal zu importieren, lässt sich der Stern  durch die entsprechenden Unterklassen ersetzen, welche im Verlauf dieser Bachelorarbeit vorgestellt werden. Des Weiteren lassen sich dort die vier Python-Dateien finden, auf denen diese Arbeit beruht.\\
+
+Hinter den meisten Definitionen stehen die zugehörigen englischen Begriffe in Klammern. Dies dient vor allem dazu, die entsprechenden Methoden im Code zu finden. Der gesamte Code inklusive Kommentare wurde, wie in der Informatik üblich, auf Englisch verfasst.\\
+
+Als nächstes möchte ich darauf hinweisen, dass es zu den meisten Definitionen und Sätzen passende Beispiele gibt. Zum einen sind die Rechnungen mit Zwischenschritten von Hand ausgeführt und zum anderen gibt es passende Codeschnipsel, die die Funktionalität des Programms zeigen sollen.\\
+
+An dieser Stelle möchte ich etwas näher auf den dargestellten Code eingehen. Allgemein verwenden \lstinline|Teile des Codes| diese monospaced Schriftart. Teile, die direkt aus dem Programm entnommen sind, werden folgendermaßen gezeigt
+\begin{lstlisting}
+def foo(text):
+    print(f"Hallo {text}!")
+\end{lstlisting}
+Dies sind meist Funktionen beziehungsweise Methoden, die anhand des gezeigten Codes etwas näher erläutert werden sollen. Beispiele für die Verwendung des Codes haben zusätzlich Zeilennummern
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+text = "Welt"
+foo(text)
+\end{lstlisting}
+Der so gezeigte Code verwendet die standardmäßigen Python-Farben: {\color{codegreen}Grün} für Strings und {\color{codeorange}Orange} für Keywords, was leider bei der Ausgabe in \LaTeX{} manchmal etwas verwirrend aussieht, wenn man \lstinline|lambda| als Symbol $\lambda$ verwendet und nicht die entsprechende Python-Funktionalität meint. Es sei erwähnt, dass die sich in der Bachelorarbeit befindenden Codeschnipsel keine Kommentare und Docstrings enthalten. Diese sind im \hyperlink{Sec:Anhang}{\blue{Programmcode}} zu finden und hätten entsprechende Teile nur unnötig verlängert.\\
+
+Da die gesamte Arbeit in \LaTeX{} verfasst ist, sind häufig klickbare Hyperlinks eingearbeitet, die zu den erwähnten Stellen führen. Diese sind \blue{blau} gekennzeichnet. Ebenso sind eingebaute Links zu Webseiten \blue{blau}. Die meisten Sätze, Definitionen, Beispiel sind prägnant benannt, um auf diese später zu verweisen.\\
+
+Definitionen, Sätze und Ähnliches, die nicht aus Maß- und Wahrscheinlichkeitstheorie bekannt sind und mehr oder weniger wortwörtlich aus Büchern oder anderen Quellen entnommen wurden, sind entsprechend durch [Name der Quelle] gekennzeichnet. Diese Quellen befinden sich am \hyperlink{Sec:Bib}{\blue{Ende}} dieser Arbeit.

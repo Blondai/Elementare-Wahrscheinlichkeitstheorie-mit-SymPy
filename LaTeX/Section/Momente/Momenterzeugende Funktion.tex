@@ -1,0 +1,545 @@
+\subsection{Momenterzeugende Funktionen}
+\hypertarget{Sec:MomErzFun}{}Wir beginnen dieses Kapitel mit der folgenden
+
+\begin{Definition}{(Momenterzeugende Funktion)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Die \textit{momenterzeugende Funktion von $X$} \en{moment-generating function} ist definiert durch
+\[M_X(t) := \mathbb{E}\left( \exp(t X) \right)~.\]
+Insbesondere ist $M_X: \mathbb{D} \rightarrow \mathbb{R}: t \mapsto M_X(t)$ für $\mathbb{D} := \{ t \in \mathbb{R} \mid M_X(t) < \infty\}$ eine Abbildung.
+\end{Definition}
+
+\newpage
+
+Wir werden nun die momenterzeugende Funktion implementieren.
+
+\begin{Code}{(\lstinline|moment_generating_function|)}
+Dank der allgemeinen Integrationsmethode ist auch an dieser Stelle nicht viel zu implementieren.
+\begin{lstlisting}
+def moment_generating_function(self):
+    if hasattr(self, 'MGF'):
+        moment_generating_function = self.MGF
+    else:
+        t = sym.Symbol('t', real=True)
+        moment_generating_function = self.integrate_random_variable(sym.exp(t * self.variable))
+        self.MGF = moment_generating_function
+    return moment_generating_function
+\end{lstlisting}
+Neu ist, dass wir zuvor noch das Symbol \lstinline|t| definieren müssen. Da dieses Symbol hier verwendet wird, sollte man in der Definition seiner Dichtefunktion kein \lstinline|t| verwenden, da dies sonst zu großen Schwierigkeiten führt. Weiter prüfen wir zuerst, ob das Attribut \lstinline|MGF| schon belegt ist. In diesem Attribut wird die momenterzeugende Funktion nach der ersten Berechnung gespeichert, um Berechnungen zu beschleunigen.\\
+
+Zur momenterzeugenden Funktion gibt es auch eine Visualisierungsmethode. Diese ist unter \lstinline|plot_moment_generating_function| zu finden und funktioniert wie \hyperlink{Code:PlotDensity}{\blue{\lstinline|plot_denisty|}} für stetige Zufallsvariablen. Auf Beispiele zur Visualisierung wollen wir verzichten.\\
+
+Um zu zeigen, wieso in der Dichte kein \lstinline|t| verwendet werden sollte, definieren wir beispielsweise folgendermaßen eine Exponentialverteilung
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+t = sym.Symbol('t', real=True)
+lamda = sym.Symbol('lamda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * t)
+rv = RandomVariableContinuous(density, t, [sym.Integer(0), sym.oo])
+moment_generating_function = rv.moment_generating_function()
+\end{lstlisting}
+SymPy liefert uns \lstinline|lamda*Integral(exp(t**2)*exp(-lamda*t), (t, 0, oo))| für die momenterzeugende Funktion. Dieses Integral kann SymPy nicht berechnen, da es aufgrund des $t^2$ Terms divergiert. Wir werden im folgenden Beispiel die richtige momenterzeugende Funktion berechnen.
+\end{Code}
+
+\vspace*{-\medskipamount}
+
+\begin{Bemerkung}{(Momenterzeugende Funktion in Null)}
+\hypertarget{Bem:MomGenFun_Null}{}Sei $X$ eine reelle Zufallsvariable und $M_X$ eine um Null existierende momenterzeugende Funktion. Betrachte
+\begin{align*}
+M_X(0) &= \mathbb{E}(\exp(0 \cdot x))\\
+&= \mathbb{E}(\exp(0))\\
+&= \mathbb{E}(1)\\
+&= \int 1 \d \mathbb{P}~.
+\intertext{Da $\mathbb{P}$ ein Wahrscheinlichkeitsmaß ist, folgt aus der Normiertheit}
+&= 1~.
+\end{align*}
+Dies werden wir später noch benötigen. Diese Aussage können wir wieder mit SymPy \glqq beweisen\grqq{}. Mit
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+t = sym.Symbol('t', real=True)
+f = sym.Function('f')(x)
+rv = RandomVariableContinuous(f, x, force_density=True)
+moment_generating_function = rv.moment_generating_function()
+value = moment_generating_function.subs(t, sym.Integer(0))
+\end{lstlisting}
+erhalten wir \lstinline|Integral(f(x), (x, -oo, oo))|, was eins ist.
+\end{Bemerkung}
+
+Wir werden nun einige Beispiele für momenterzeugende Funktionen berechnen.
+
+\begin{Beispiel}{(Momenterzeugende Funktionen)}
+\hypertarget{Bsp:Moment_Erz}{}
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X \sim \Ber(p)$ mit $p \in (0, 1)$ Bernoulli-verteilt. Wir berechnen mit $E = \{0, 1\}$
+\begin{align*}
+M_X(t) &= \int \exp(t X) \d \mathbb{P}\\
+&= \sum_{n \in E} \exp(t n) \mathbb{P}(X = n)\\
+&= \exp(t \cdot 0) \mathbb{P}(X = 0) + \exp(t \cdot 1) \mathbb{P}(X = 1)\\
+&= \exp(0) (1 - p) + \exp(t) p\\
+&= (1 - p) + p \exp(t)~.
+\end{align*}
+Um dies mit dem Programm zu berechnen, verwenden wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+p = sym.Symbol('p', real=True, positive=True)
+n = sym.Symbol('n', integer=True, nonnegative=True)
+density = {1: p, 0: 1 - p}
+rv = RandomVariableFinite(density, n)
+moment_generating_function = rv.moment_generating_function()
+\end{lstlisting}
+und erhalten ebenfalls \lstinline|p*exp(t) - p + 1|.
+
+\item Sei $X \sim \Exp(\lambda)$ mit $\lambda > 0$ exponentialverteilt. Wir berechnen
+\begin{align*}
+M_X(t) &= \int \exp(t X) \d \mathbb{P}\\
+&= \int_{-\infty}^\infty \exp(t x) \lambda \exp(- \lambda x) \indi_{[0, \infty)}(x) \d x\\
+&= \lambda \int_0^\infty  \exp\left( (t - \lambda) x \right) \d x\\
+&= \lambda \left[ \frac{1}{t - \lambda} \exp\left( (t - \lambda) x \right) \right]_0^\infty\\
+&= \lambda \left[ 0 - \frac{1}{t - \lambda} \right]\\
+&= \frac{\lambda}{\lambda - t}~.
+\end{align*}
+Durch
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+lamda = sym.Symbol('lambda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * x)
+rv = RandomVariableContinuous(density, x, [sym.Integer(0), sym.oo])
+moment_generating_function = rv.moment_generating_function()
+\end{lstlisting}
+erhalten wir ebenfalls \lstinline|lambda/(lambda - t)|.
+
+\item Sei nun $X \sim \Nor(\mu, \sigma)$ mit $\mu \in \mathbb{R}$ und $\sigma > 0$ normalverteilt. 
+Diese momenterzeugende Funktion wollen wir nicht von Hand berechnen, da dies ziemlich kompliziert ist. SymPy schafft dies folgendermaßen problemlos.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.symbols('x', real=True)
+mu = sym.symbols('mu', real=True)
+sigma = sym.symbols('sigma', real=True, positive=True)
+density = 1 / (sigma * sym.sqrt(2 * sym.pi)) * sym.exp(- (x - mu)**2 / (2 * sigma**2))
+rv = RandomVariableContinuous(density, x)
+moment_generating_function = rv.moment_generating_function()
+\end{lstlisting}
+Wir erhalten \lstinline|exp(t*(mu + sigma**2*t/2))|, wie in \cite{Joram} nachzulesen ist.
+\end{enumerate}
+\end{Beispiel}
+
+\newpage 
+
+Wir werden nun einen Satz beweisen, der es uns erlaubt die momenterzeugenden Funktion als eine Potenzreihe der Momente darzustellen.
+
+\begin{Satz}{(Potenzreihendarstellung der momenterzeugenden Funktion) \cite{Meintrup}}
+\hypertarget{Satz:Potenzreihe}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Ist $M_X$ die momenterzeugende Funktion und existiert ein $\varepsilon > 0$, sodass $(- \varepsilon, \varepsilon) \subseteq \mathbb{D}$, so gilt
+\[M_X(t) = \sum_{n = 0}^\infty \frac{t^n}{n!} \mathbb{E}(X^n)~.\]
+\end{Satz}
+
+\begin{Beweis}{\cite{Meintrup}}
+Betrachte die Potenzreihe der Exponentialfunktion
+\[\exp(t c) = \sum_{n = 0}^\infty \frac{t^n}{n!} c^n~.\]
+Wir erkennen eine deutliche Ähnlichkeit zu dem, was wir zeigen wollen. Wir müssen also beweisen, dass wir Erwartungswert und Summation vertauschen dürfen. Sei für $N \in \mathbb{N}$ durch
+\[f_N(X) := \sum_{n = 0}^N \frac{t^n}{n!} X^n\]
+eine Folge von Zufallsvariablen definiert. Dann gilt nach obiger Potenzreihe
+\begin{align*}
+M_X(t) &= \mathbb{E}\left( \exp(t X) \right)\\
+&= \mathbb{E}\left( \lim_{N \rightarrow \infty} f_N(X) \right)~.
+\intertext{Da nach Definition $\exp(t X)$ überall auf $\mathbb{D}$ $\mathbb{P}_X$-integierbar ist, können wir mit dem Satz von Lebesgue Limes und Integration vertauschen und erhalten}
+&= \lim_{N \rightarrow \infty} \mathbb{E}\left( f_N(X) \right)\\
+&= \lim_{N \rightarrow \infty} \mathbb{E}\left( \sum_{n = 0}^N \frac{t^n}{n!} X^n \right)~.
+\intertext{Dank Linearität des Erwarungswertes folgt für diese endliche Summe}
+&= \lim_{N \rightarrow \infty} \sum_{n = 0}^N \frac{t^n}{n!} \mathbb{E}(X^n)\\
+&= \sum_{n = 0}^\infty \frac{t^n}{n!} \mathbb{E}(X^n)~,
+\end{align*}
+was zu zeigen war.
+\end{Beweis}
+\medskip
+
+Damit können wir nun mit der momenterzeugenden Funktion die Momente berechnen.
+
+\begin{Korollar}{(Momente mit momenterzeugenden Funktion)}
+\hypertarget{Kor:Momente_MomGenFun}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Ist $M_X$ die momenterzeugende Funktion und existiert ein $\varepsilon > 0$, sodass $(- \varepsilon, \varepsilon) \subseteq \mathbb{D}$, so gilt
+\[\mathbb{E}(X^n) = \left[ \frac{\d^n}{\d t^n} M_X(t) \right]_{t = 0}\]
+und alle Momente sind endlich.
+\end{Korollar}
+
+\begin{Beweis}{}
+Betrachte zuerst
+\begin{align*}
+\frac{\d^n}{\d t^n} t^k = \begin{cases}
+\frac{k!}{(n - k)!} t^{k - n}, &n < k\\
+n!, &n = k\\
+0, &n > k~.
+\end{cases}
+\end{align*}
+Setzen wir $t = 0$ ein, so gilt
+\begin{align*}
+\left[ \frac{\d^n}{\d t^n} t^k \right]_{t = 0} = \begin{cases}
+0, &n < k\\
+n!, &n = k\\
+0, &n > k~.
+\end{cases}
+\end{align*}
+Mit dem \hyperlink{Satz:Potenzreihe}{\blue{Satz über die Potenzreihendarstellung der momenterzeugenden Funktion}} gilt
+\begin{align*}
+\left[ \frac{\d^n}{\d t^n} M_X(t) \right]_{t = 0} &= \left[ \frac{\d^n}{\d t^n} \sum_{k = 0}^\infty \frac{t^k}{k!} \mathbb{E}(X^k) \right]_{t = 0}~.
+\intertext{Da eine Potenzreihe im inneren ihre Konvergenzradiuses unendlich oft differenzierbar ist, folgt durch Vertauschen von Differentiation und Summenbildung}
+&= \left[ \sum_{k = 0}^\infty \frac{\d^n}{\d t^n} \frac{t^k}{k!} \mathbb{E}(X^k) \right]_{t = 0}~.
+\intertext{Nach obiger Betrachtung bleibt nur für Summanden mit $n = k$ der Faktor $n!$ übrig. Es folgt also}
+&= \frac{n!}{n!} \mathbb{E}(X^n)\\
+&= \mathbb{E}(X^n)~,
+\end{align*}
+was zu zeigen war.
+\end{Beweis}
+\medskip
+
+Dieses Korollar werden wir als Methode zur alternative Berechnung der Momente implementieren.
+
+\begin{Code}{(\lstinline|_moment_generating|)}
+\hypertarget{Code:n_Moment_Generating}{}Wir haben nun gesehen, dass wir mithilfe der momenterzeugenden Funktion die Momente einer Zufallsvariable erzeugen können. Da wir hier einige Werkzeuge von SymPy verwenden, die wir bisher noch nicht benötigt haben, wollen wir hier den Code besprechen.
+\begin{lstlisting}
+def _moment_generating(self, n):
+    t = sym.Symbol('t', real=True)
+    moment_generating_function = self.moment_generating_function()
+    moment = sym.diff(moment_generating_function, (t, n))
+    moment = moment.subs(t, sym.Integer(0))
+    moment = sym.simplify(moment)
+    return moment
+\end{lstlisting}
+Zuerst lassen wir uns die momenterzeugende Funktion bestimmen. Diese leiten wir mithilfe von SymPy  \lstinline|n| mal nach \lstinline|t| ab. Anschließend setzen wir für \lstinline|t| den Wert \lstinline|0| ein und versuchen dies zu vereinfachen. Es ist es wichtig in der Ableitung \lstinline|(t, n)| zu klammern, falls man für \lstinline|n| ein Symbol verwenden möchte.
+
+\newpage
+
+Dazu betrachten wir das folgende kurze Beispiel.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+n = sym.Symbol('n', integer=True, positive=True)
+f = sym.exp(x**2)
+wrong = sym.Derivative(f, x, n)
+right = sym.Derivative(f, (x, n))
+\end{lstlisting}
+Die \lstinline|Derivative|-Methode ist eine noch nicht ausgeführte Version der \lstinline|diff| Methode. Wir erhalten im ersten Fall
+\[\frac{\d^2}{\d x \d n} \exp(x^2)~,\]
+was wir nicht wollen und im zweiten Fall
+\[\frac{\d^n}{\d x^n} \exp(x^2)~.\] 
+Mit dieser Methode ist es leider nicht möglich das allgemeine $n$-te Moment zu berechnen, da SymPy  keine Funktion $n$-mal ableiten möchte. Selbst
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+n = sym.Symbol('n', integer=True, postive=True)
+expr = sym.exp(x)
+derivative = sym.diff(expr, (x, n))
+\end{lstlisting}
+bleibt unevaluiert.
+\end{Code}
+
+Mithilfe dieser neuen Methode werden wir nun einige Momente berechnen.
+
+\begin{Beispiel}{(Momente mit momenterzeugenden Funktionen)}
+Wir verwenden die momenterzeugenden Funktionen aus \hyperlink{Bsp:Moment_Erz}{\blue{obigem Beispiel}}
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X \sim \Ber(p)$ mit $p \in (0, 1)$ Bernoulli-verteilt. Die momenterzeugende Funktion ist dann
+\[M_X(t) = (1 - p) + p \exp(t)~.\]
+Wir berechnen beispielsweise das vierte Moment
+\begin{align*}
+\mathbb{E}(X^4) &= \left[ \frac{\d^4}{\d t^4} M_X(t) \right]_{t = 0}\\
+&= \left[ \frac{\d^4}{\d t^4} (1 - p) + p \exp(t) \right]_{t = 0}~.
+\intertext{Der erste Summand fällt beim Ableiten weg, da dort kein $t$ vorkommt und der hintere verändert sich nicht. Somit gilt}
+&= \left[ p \exp(t) \right]_{t = 0}\\
+&= p \exp(0)\\
+&= p
+\end{align*}
+Verwenden wir
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+p = sym.Symbol('p', real=True, positive=True)
+n = sym.Symbol('n', integer=True, nonnegative=True)
+density = {1: p, 0: 1 - p}
+rv = RandomVariableFinite(density, n)
+fourth_moment = rv._moment_generating(4)
+\end{lstlisting}
+so erhalten wir ebenfalls \lstinline|p|.
+
+\item Sei $X \sim \Exp(\lambda)$ mit $\lambda > 0$ exponentialverteilt. Die momenterzeugende Funktion ist
+\[M_X(t) = \frac{\lambda}{\lambda - t}~.\]
+Wir berechnen das zweite Moment
+\begin{align*}
+\mathbb{E}(X^2) &= \left[ \frac{\d^2}{\d t^2} M_X(t) \right]_{t = 0}\\
+&= \left[ \frac{\d^2}{\d t^2} \frac{\lambda}{\lambda - t} \right]_{t = 0}~.
+\intertext{Einmal Ableiten liefert}
+&= \left[ \frac{\d}{\d t} \frac{\lambda}{(\lambda - t)^2} \right]_{t = 0}
+\intertext{und nochmal Ableiten liefert dann}
+&= \left[ \frac{2 \lambda}{(\lambda - t)^3} \right]_{t = 0}\\
+&= \frac{2 \lambda}{(\lambda - 0)^3}\\
+&= \frac{2}{\lambda^2}~.
+\end{align*}
+Durch
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+lamda = sym.Symbol('lambda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * x)
+rv = RandomVariableContinuous(density, x, [sym.Integer(0), sym.oo])
+second_moment = rv._moment_generating(2)
+\end{lstlisting}
+erhalten wir \lstinline|2/lambda**2|.
+
+\item \hypertarget{Bsp:Normal_mean}{}Sei nun $X \sim \Nor(\mu, \sigma)$ mit $\mu \in \mathbb{R}$ und $\sigma > 0$ normalverteilt. Die momenterzeugende Funktion ist
+\begin{align*}
+M_X(t) &= \exp\left( t \left( \mu + \frac{\sigma^2 t}{2} \right) \right)\\
+&= \exp\left( \mu t + \frac{\sigma^2}{2} t^2 \right)~.
+\end{align*}
+Hier wollen wir nur das erste Moment bestimmen. Betrachte also
+\begin{align*}
+\mathbb{E}(X) &= \left[ \frac{\d}{\d t} M_X(t) \right]_{t = 0}\\
+&= \left[ \frac{\d}{\d t} \exp\left( \mu t + \frac{\sigma^2}{2} t^2 \right) \right]_{t = 0}~.
+\intertext{Die Kettenregel liefert}
+&= \left[ (\mu + \sigma^2 t) \exp\left( \mu t + \frac{\sigma^2}{2} t^2 \right) \right]_{t = 0}\\
+&= (\mu + \sigma^2 \cdot 0) \exp(0)\\
+&= \mu~.
+\end{align*}
+
+\newpage 
+
+Das Programm liefert mit
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.symbols('x', real=True)
+mu = sym.symbols('mu', real=True)
+sigma = sym.symbols('sigma', real=True, positive=True)
+density = 1 / (sigma * sym.sqrt(2 * sym.pi)) * sym.exp(- (x - mu)**2 / (2 * sigma**2))
+rv = RandomVariableContinuous(density, x)
+first_moment = rv._moment_generating(1)
+\end{lstlisting}
+ebenfalls \lstinline|mu|.
+\end{enumerate}
+Mittels Integration erhalten wir jeweils dasselbe Ergebnis.
+\end{Beispiel}
+
+Diese Methoden zur Berechnung der Momente wollen wir nun zusammenfassen.
+
+\begin{Code}{(\lstinline|moment|)}
+\hypertarget{Code:Moment}{}
+\begin{lstlisting}
+def moment(self, n, use_integration=True):
+    if use_integration == True:
+        moment = self._moment_integration(n)
+    else:
+        moment = self._moment_generating(n)
+    return moment
+\end{lstlisting}
+Standardmäßig wird für die Berechnung von Momenten Integration verwenden, da dies besser funktioniert. Wir werden \hyperlink{Sec:Laufzeit}{\blue{anschließend}} die beiden Methoden in ihrer Geschwindigkeit vergleichen. Sollte man die Berechnung mithilfe der momenterzeugenden Funktion bevorzugen, kann man einfach das Argument \lstinline|use_integration=False| verwenden.
+\end{Code}
+
+\begin{Satz}{(Verschiebesatz)}
+\hypertarget{Satz:Verschiebesatz}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable mit momenterzeugender Funktion $M_X$. Für $a, b \in \mathbb{R}$ gilt
+\[M_{a X + b}(t) = \exp(b t) M_X(a t)~.\]
+\end{Satz}
+
+\begin{Beweis}{}
+Betrachte
+\begin{align*}
+M_{aX + b}(t) &= \mathbb{E}\left( \exp((aX + b) t) \right)\\
+&= \int \exp((aX + b) t) \d \mathbb{P}\\
+&= \int \exp(aX t + b t) \d \mathbb{P}\\
+&= \int \exp(aX t) \exp(b t) \d \mathbb{P}\\
+&= \int \exp(a X(\omega) t) \exp(b t) \d \mathbb{P}(\omega)~.
+\intertext{Da der hintere Faktor nicht von $\omega$ abhängt, lässt sich dieser einfach vor das Integral ziehen und es gilt}
+&= \exp(b t) \int \exp(a X t) \d \mathbb{P}\\
+&= \exp(b t) \int \exp(X (at)) \d \mathbb{P}\\
+&= \exp(b t) M_X(a t)~,
+\end{align*}
+was zu zeigen war.
+\end{Beweis}
+
+\newpage
+
+Wenden wir diesen Satz jetzt auf eine zentrierte und standardisierte Zufallsvariable an, so erhalten wir das folgende
+
+\begin{Korollar}{(Zentral- und Standardmomenterzeugende Funktion)}
+\hypertarget{Satz:ZSMomErzFun}{}Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine Zufallsvariable. Weiter seien $\mu$ und $\sigma$ der Erwartungswert und die Standardabweichung.
+Für
+\[\overline{X} = X - \mu\]
+gilt dann
+\[M_{\overline{X}}(t) = \exp(- \mu t) M_X(t)~.\]
+Für
+\[\tilde{X} = \frac{X - \mu}{\sigma}\]
+gilt dann
+\[M_{\tilde{X}}(t) = \exp\left( - \frac{\mu}{\sigma} t \right) M_X\left( \frac{1}{\sigma} t \right)~.\]
+Diese beiden Funktionen können wir dann als \textit{zentral-} beziehungsweise \textit{standardmomenterzeugende Funktionen} bezeichnen.
+\end{Korollar}
+
+\begin{Beweis}{}
+Betrachte zunächst
+\[\overline{X} = X - \mu~.\]
+Mit dem \hyperlink{Satz:Verschiebesatz}{\blue{Verschiebesatz}} folgt für $a = 1$ und $b = - \mu$
+\begin{align*}
+M_{\overline{X}}(t) &= \exp(- \mu t) M_X(t)~.
+\end{align*}
+Für
+\begin{align*}
+\tilde{X} &= \frac{X - \mu}{\sigma}\\
+&= \frac{X}{\sigma} - \frac{\mu}{\sigma}
+\end{align*}
+folgt ähnlich für $a = 1 / \sigma$ und $b = - \mu / \sigma$
+\begin{align*}
+M_{\tilde{X}}(t) &= \exp\left( - \frac{\mu}{\sigma} \right) M_X\left( \frac{t}{\sigma} \right)
+\end{align*}
+dank dem \hyperlink{Satz:Verschiebesatz}{\blue{obigen Satz}}.
+\end{Beweis}
+
+\medskip
+
+Auch zu diesen beiden Funktionen können wir Methoden zur Berechnung implementieren.
+
+\begin{Code}{(\lstinline|standardized_moment_generating_function|)}
+Wir implementieren die zentral- beziehungsweise standardmomenterzeugenden Funktionen wie \hyperlink{Satz:ZSMomErzFun}{\blue{oben}} erarbeitet. Da dies für beide Fälle ähnlich abläuft, werden wir dies nur für Letztere zeigen.
+\begin{lstlisting}
+def standardized_moment_generating_function(self):
+    if hasattr(self, 'SMGF'):
+        standardized_moment_generating_function = self.SMGF
+    else:
+        t = sym.Symbol('t', real=True)
+        mu = self.mean()
+        sigma = self.standard_deviation()
+        moment_generating_function = self.moment_generating_function().subs(t, t / sigma)
+        standardized_moment_generating_function = sym.exp(- mu / sigma * t) * moment_generating_function
+        standardized_moment_generating_function = sym.simplify(standardized_moment_generating_function)
+        self.SMGF = standardized_moment_generating_function
+    return standardized_moment_generating_function
+\end{lstlisting}
+Als erstes überprüfen wir, wie bei der momenterzeugenden Funktion, ob das Attribut \lstinline|SMGF| schon belegt ist. Ansonsten lassen wir in einem ersten Schritt Erwartungswert, Standardabweichung und momenterzeugende Funktion berechnen. Nach \hyperlink{Satz:ZSMomErzFun}{\blue{obigen Satzes}} bilden wir dann die standardmomenterzeugenden Funktionen und vereinfachen diese. Mithilfe dieser Funktionen können wir nun ebenfalls Zentral- und Standardmomente berechnen. Der Code für \lstinline|_central_moment_generating| und \lstinline|_standard_moment_generating| ist analog zu \hyperlink{Code:n_Moment_Generating}{\blue{\lstinline|_moment_generating|}} und wird daher nicht vorgeführt.
+\end{Code}
+
+An dieser Stelle betrachten wir eine eng mit der momenterzeugenden Funktion verwandte Funktion, die uns ein weiteres Set an Charakteristika liefert.
+
+\begin{Definition}{(Kumulantenerzeugende Funktion und Kumulanten)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable mit momenterzeugender Funktion $M_X$. Die \textit{Kumulantenerzeugende Funktion von $X$} \en{cumulant-generating function} ist definiert durch
+\begin{align*}
+K_X(t) &:= \log\left( M_X(t) \right)\\
+&= \log\left( \mathbb{E}\left( \exp(t X) \right) \right)~.
+\end{align*}
+Insbesondere ist $K_X: \mathbb{D} \rightarrow \mathbb{C}: t \mapsto K_X(t)$ eine Abbildung. Die $n$-te \textit{Kumulante} \en{cumulant} ist dann definiert durch
+\[\kappa_n := \left[ \frac{\d^n}{\d t^n} K_X(t) \right]_{t = 0}~.\]
+\end{Definition}
+
+\begin{Code}{(\lstinline|cumulant_generating_function|)}
+Die Implementierung der kumulantenerzeugenden Funktion ist exakt nach obiger Definition
+\begin{lstlisting}
+def cumulant_generating_function(self):
+    if hasattr(self, 'CGF'):
+        cumulant_generating_function = self.CGF
+    else:
+        moment_generating_function = self.moment_generating_function()
+        cumulant_generating_function = sym.log(moment_generating_function)
+        cumulant_generating_function = sym.simplify(cumulant_generating_function)
+        self.CHF = cumulant_generating_function
+    return cumulant_generating_function
+\end{lstlisting}
+und die der Kumulanten ist analog zu Definition von \hyperlink{Code:n_Moment_Generating}{\blue{\lstinline|_moment_generating|}}.
+\end{Code}
+
+\vspace*{-\medskipamount}
+
+\begin{Bemerkung}{(Einfache Kumulanten)}
+Gegeben sei eine Zufallsvariable $X$ mit momenterzeugender Funktion $M_X$. Betrachte nun
+\begin{align*}
+\kappa_1 &= \left[ \frac{\d}{\d t} K_X(t) \right]_{t = 0}\\
+&= \left[ \frac{\d}{\d t} \log(M_X(t)) \right]_{t = 0}~.
+\intertext{Mit der Kettenregel folgt}
+&= \left[ \frac{1}{M_X(t)} M_X'(t) \right]_{t = 0}\\
+&= \frac{1}{M_X(0)} M_X'(0)~.
+\intertext{Dies ist wohldefiniert, da wie \hyperlink{Bem:MomGenFun_Null}{\blue{zuvor}} berechnet $M_X(0) = 1$ ist. Nach der \hyperlink{Satz:Potenzreihe}{\blue{Potenzreihendarstellung der momenterzeugenden Funktion}} finden wir rechts den Erwatungswert und es gilt}
+&= \mathbb{E}(X)~.
+\end{align*}
+
+\newpage
+
+Diesen Beweis können wir mit SymPy andeuten. Durch
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+f = sym.Function('f')(x)
+rv = RandomVariableContinuous(f, x, force_density=True)
+first_cumulant = rv.cumulant(1)
+mean = rv.mean()
+solution = first_cumulant - mean
+solution = sym.simplify(solution)
+\end{lstlisting}
+erhalten wir \lstinline|(1 - Integral(f(x), (x, -oo, oo)))*Integral(x*f(x), (x, -oo, oo))/Integral(f(x), (x, -oo, oo))|. Da $f$ eine Dichte ist, wird der vordere Faktor zu Null. Damit ist dann gezeigt, dass Erwartungswert und erster Kumulante gleich sind.\\
+
+Wir betrachten nun den zweiten Kumulanten
+\begin{align*}
+\kappa_2 &= \left[ \frac{\d^2}{\d t^2} K_X(t) \right]_{t = 0}\\
+&= \left[ \frac{\d^2}{\d t^2} \log(M_X(t)) \right]_{t = 0}~.
+\intertext{Mit der Kettenregel folgt}
+&= \left[ \frac{\d}{\d t} \frac{1}{M_X(t)} M_X'(t) \right]_{t = 0}~.
+\intertext{Mit Produkt- und Kettenregel folgt}
+&= \left[ - \frac{1}{M_X(t)^2} M_X'(t) M_X'(t) + \frac{1}{M_X(t)} M_X''(t) \right]_{t = 0}\\
+&= \left[ \frac{1}{M_X(t)} M_X''(t) - \frac{1}{M_X(t)^2} M_X'(t)^2 \right]_{t = 0}\\
+&= \frac{1}{M_X(0)} M_X''(0) - \frac{1}{M_X(0)^2} M_X'(0)^2~.
+\intertext{Mit einer ähnlichen Argumentation zu oben folgt}
+&= \mathbb{E}(X^2) - \mathbb{E}(X)^2
+\intertext{und wir finden}
+&= \Var(X)~.
+\end{align*}
+Dies lässt sich leider nicht sinnvoll mit SymPy \glqq beweisen\grqq{}.
+\end{Bemerkung}
+
+Wir berechnen nun einige kumulantenerzeugende Funktionen.
+
+\begin{Beispiel}{(Kumulantenerzeugende Funktionen)}
+Wir verwenden die Zufallsvariablen, für die wir \hyperlink{Bsp:Moment_Erz}{\blue{schon}} die momenterzeugende Funktion berechnet haben.
+\begin{enumerate}[label=(\roman*)]
+\item Sei $X \sim \Ber(p)$ mit $p \in (0, 1)$ Bernoulli-verteilt. Die momenterzeugende Funktion ist dann
+\[M_X(t) = (1 - p) + p \exp(t)~.\]
+Damit ergibt sich die kumulantenerzeugende Funktion durch
+\begin{align*}
+K_X(t) &= \log(M_X(t))\\
+&= \log\left( (1 - p) + p \exp(t) \right)~.
+\end{align*}
+
+\newpage
+
+Durch
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+p = sym.Symbol('p', real=True, positive=True)
+n = sym.Symbol('n', integer=True, nonnegative=True)
+density = {1: p, 0: 1 - p}
+rv = RandomVariableFinite(density, n)
+cumulant_generating_function = rv.cumulant_generating_function()
+\end{lstlisting}
+erhalten wir ebenfalls \lstinline|log(p*exp(t) - p + 1)|.
+
+\item Sei $X \sim \Exp(\lambda)$ mit $\lambda > 0$ exponentialverteilt. Die momenterzeugende Funktion ist
+\[M_X(t) = \frac{\lambda}{\lambda - t}\]
+Für die kumulantenerzeugende Funktion gilt dann
+\begin{align*}
+K_X(t) &= \log(M_X(t))\\
+&= \log\left( \frac{\lambda}{\lambda - t} \right)\\
+&= \log(\lambda) - \log(\lambda - t)~.
+\end{align*}
+Mittels
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+lamda = sym.Symbol('lambda', real=True, positive=True)
+density = lamda * sym.exp(- lamda * x)
+rv = RandomVariableContinuous(density, x, [sym.Integer(0), sym.oo])
+cumulant_generating_function = rv.cumulant_generating_function()
+\end{lstlisting}
+erhalten wir ebenso \lstinline|log(lambda/(lambda - t))|.
+
+\item Sei nun $X \sim \Nor(\mu, \sigma)$ mit $\mu \in \mathbb{R}$ und $\sigma > 0$ normalverteilt. Die momenterzeugenden Funktion ist
+\[M_X(t) = \exp\left( \mu t + \frac{\sigma^2}{2} t^2 \right)~.\]
+Damit ergibt sich die folgende kumulantenerzeugende Funktion
+\begin{align*}
+K_X(t) &= \log(M_X(t))\\
+&= \log\left( \exp\left( \mu t + \frac{\sigma^2}{2} t^2 \right) \right)\\
+&= \mu t + \frac{\sigma^2}{2} t^2~.
+\end{align*}
+Durch
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.symbols('x', real=True)
+mu = sym.symbols('mu', real=True)
+sigma = sym.symbols('sigma', real=True, positive=True)
+density = 1 / (sigma * sym.sqrt(2 * sym.pi)) * sym.exp(- (x - mu)**2 / (2 * sigma**2))
+rv = RandomVariableContinuous(density, x)
+cumulant_generating_function = rv.cumulant_generating_function()
+\end{lstlisting}
+erhalten wir \lstinline|t*(2*mu + sigma**2*t)/2|, was dasselbe ist. Es ist interessant, dass SymPy sich für diese doch etwas komplizierte Vereinfachung entscheidet. Verwenden wir nun
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}, firstnumber=7]
+cumulant_generating_function = sym.expand(cumulant_generating_function)
+\end{lstlisting}
+so erhalten wir \lstinline|mu*t + sigma**2*t**2/2| wie oben.
+\end{enumerate}
+Auf die Berechnung von Kumulanten dieser Zufallsvariablen wollen wir verzichten. Die entsprechende Methode ist unter \lstinline|cumulant| zu finden. Sie funktioniert analog zu \hyperlink{Code:n_Moment_Generating}{\blue{\lstinline|_moment_generating|}}.
+\end{Beispiel}
+
+\vspace*{-\medskipamount}

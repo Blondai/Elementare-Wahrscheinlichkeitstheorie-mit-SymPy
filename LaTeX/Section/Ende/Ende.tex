@@ -1,0 +1,25 @@
+\section{Mögliche Erweiterungen}
+
+In diesem letzten Kapitel werden wir uns mit einigen möglichen Erweiterungen beschäftigen.\\
+
+Eine wichtige Verallgemeinerung wäre es auf jeden Fall diese Bibliothek auf $d$-dimensionale Zufallsvektoren zu erweitern. Dies war anfangs auch das Ziel, doch leider stoß da SymPy auf einige Probleme. Ein großer Teil aller besprochenen Funktionen hat ohne Probleme auch für mehrdimensionale Zufallsvariablen funktioniert. Entsprechend wird beispielsweise der Erwartungswert zum Erwartungsvektor. Als großes Problem stellt sich dabei heraus, dass die Berechnung nur für Zufallsvektoren mit unabhängigen Einträgen funktionierte. Als erstes wurde eine zweidimensionale Multinormalverteilung versucht und SymPy hat ohne Ergebnis oder Fehler eine gute Stunde versucht den Erwartungswert zu berechnen. Ersetzen von $\mu_1$ und $\mu_2$ durch konkrete Zahlen erlaubte es SymPy nach langer Rechnung zumindest numerisch den Erwartungsvektor ungefähr zu berechnen. Für das nächste Beispiel wurde $X \sim \Exp(\lambda)$ und $Y \sim \Nor(\mu, \sigma)$ gewählt und der Zufallsvektor $(X, X + Y)^\top$ betrachtet. Auch hier rechnete SymPy ergebnislos für sehr lange Zeit. Da nicht einmal die Berechnung des Erwartungswertes für diese doch ziemlich einfachen Beispiele funktionierte, wurde dieser Teil nicht weiter bearbeitet.\\
+
+Eine weitere nützliche Erweiterung wäre es zur Definition eines \lstinline|RandomVariable|-Objekts nicht mehr eine Dichte zu fordern. Man könnte also versuchen dieses Objekt mit der Verteilungs- oder charakteristischen Funktion zu definieren. Man müsste dann entsprechend die Methoden anpassen, dass diese in der Lage sind entsprechende Charakteristika auf anderen Wegen zu berechnen. Also beispielsweise
+\begin{align*}
+\mathbb{E}(X) &= \int_0^\infty 1 - F(x) \d x - \int_{-\infty}^0 F(x) \d x
+\intertext{mit Verteilungsfunktion oder}
+\mathbb{E}(X) &= \left[ \frac{\d}{\d t} \frac{C_X(t)}{i} \right]_{t = 0}
+\end{align*}
+mit charakteristischer Funktion. Außerdem könnte man damit eine deutlich größere Klasse an Zufallsvariablen simulieren.\\
+
+Eine weiter schöne Erweiterung wäre es, die Python-Operatoren für Addition, Subtraktion, Multiplikation und Division zu implementieren. Damit könnte man dann zwei \lstinline|RandomVariable|-Objekte addieren, um daraus ein Neues zu erhalten. Da die Dichte der Summe von Zufallsvariablen deren Faltung ist, müsste man eine entsprechende Faltungsmethode definieren. Damit könnte man dann vielleicht entsprechende Sätze über die Summe von unabhängigen (identisch verteilten) Zufallsvariablen \glqq zeigen\grqq{} oder eine Brücke zu stochastischen Prozessen schlagen.\\
+
+Umgekehrt gäbe es die Möglichkeit einer Spezialisierung. Man könnte für häufig vorkommende Verteilungen, wie zum Beispiel der Normalverteilung eine Unterklasse erstellen, die dann manche Berechnungen nicht mehr durchführen muss, um Rechenaufwand zu sparen. Beispielsweise verschwinden die ungeraden Momente einer Standardnormalverteilung aus Symmetriegründen. SymPy sieht dies leider nicht immer und berechnet deshalb das entsprechende Integral ohne abzukürzen. Durch die Unterklasse könnte man sich diese Berechnung ersparen. Die Implementierung von diesen Unterklassen hätte dann auch den Vorteil, dass Eingaben einfacher werden würden. Momentan muss man die ganzen Dichten und Symbole mit SymPy manuell definieren. Für diese Unterklassen wäre das dann alles schon programmiert und für ein Normalverteilungsobjekt müsste man nur ein $\mu$ und ein $\sigma$ angeben.\\
+
+Sehr interessant wäre es zudem einen vierten Typen der Zufallsvariablen zu implementieren, der deutlich abstrakter ist. Man müsste zuerst eine Klasse auf die \lstinline|sym.Function|-Klasse aufbauen, die Dichtefunktionen beschreibt. Für diese Dichtefunktionen sollte man einen allgemeinen Integralbegriff implementieren, der Eigenschaften wie Linearität besitzt und für den man
+\[\int \varphi \d \mathbb{P} = 1\]
+definiert. Mit Dichtefunktions-Klasse könnte man dann eine \lstinline|RandomVariableAbstract|-Klasse definieren, mit der man vielleicht mehr Sätze, wie in der Bachelorarbeit angedeutet, mit SymPy \glqq beweisen\grqq{} kann.\\
+
+Ein wichtiger Teil, der in meinem Programm recht wenig Beachtung gefunden hat, ist das Exception Handling. Damit der Code nicht allzu umfangreich wird und da dieses Programm eher als proof-of-concept gedacht ist, wurde auf derartige Überprüfungen verzichtet. Man kann beispielsweise in die \lstinline|moment|-Methode ohne Probleme eine negative Zahl oder Brüche reinstecken und wird dann vermutlich einen schwierig interpretierbaren Fehler von SymPy erhalten. Um dies zu verbessern, müssten also in jede Methode entsprechende \lstinline|try|- und \lstinline|except|-Blöcke eingebaut werden, die diese Fehler herausfiltern.\\
+
+Abschließend denke ich, dass mit dieser Arbeit ein gut funktionierender Grundstein für vielfältige Erweiterungen gelegt wurde.

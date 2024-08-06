@@ -1,0 +1,59 @@
+\bgroup
+
+\begin{titlepage}
+\begin{flushleft}
+\includegraphics[width=0.4\linewidth]{./Section/Titel/logo_uni.pdf}
+\end{flushleft}
+
+\vspace*{2.5cm}
+
+\begin{center}
+{\par\noindent\rule{\textwidth}{0.4pt}
+\par\huge Elementare Wahrscheinlichkeitstheorie\\
+mit SymPy
+\par\noindent\rule{\textwidth}{0.4pt}}
+
+\vspace*{1cm}
+{\Large Bachelorarbeit\\
+im Studiengang Mathematik}
+\end{center}
+
+\vspace*{0.7cm}
+
+\begin{center}
+\begin{framed}
+\begin{footnotesize}
+\begin{verbatim}
+>>> x = sym.Symbol('x', real=True)
+>>> mu = sym.Symbol('mu', real=True)
+>>> sigma = sym.Symbol('sigma', real=True, positive=True)
+>>> density = 1 / (sigma * sym.sqrt(2 * sym.pi)) * sym.exp(- (x - mu)**2 / (2 * sigma**2))
+>>> normal_distribution = RandomVariableContinuous(density, x)
+>>> normal_distribution.characteristic_function()
+exp(t*(I*mu - sigma**2*t/2))
+\end{verbatim}
+\end{footnotesize}
+\end{framed}
+\end{center}
+
+\vspace*{3cm}
+
+\begin{center}
+{Durchgeführt am\\
+Institut für Stochastik und Anwendungen\\
+Fachbereich Mathematik\\
+Universität Stuttgart}
+\end{center}
+
+\begin{center}
+Abgabedatum: 06.08.2024
+\end{center}
+
+\vfill
+
+\begin{flushright}
+\includegraphics[width=0.2\linewidth]{./Section/Titel/mathebanner.pdf}
+\end{flushright}
+\end{titlepage}
+
+\egroup

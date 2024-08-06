@@ -1,0 +1,120 @@
+\section{Einführung in SymPy}
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\hypertarget{Sec:Einführung_in_SymPy}{}
+
+Das gesamte Projekt ist in \href{https://www.python.org/downloads/}{\blue{Python}} (3.10) und \href{https://github.com/sympy/sympy}{\blue{SymPy}} (1.12) geschrieben. Außerdem ist für manche Funktionalitäten \href{https://matplotlib.org/}{\blue{matplotlib}} (3.8.0) und \href{https://numpy.org/}{\blue{NumPy}} (1.26.3) sowie eine \href{https://www.latex-project.org/}{\blue{\LaTeX{}-Installation}} nötig. In den Klammern befindet sich jeweils die von mir verwendete Version. Die Programme sollten auch ohne Probleme mit neueren oder älteren Versionen funktionieren.\\
+
+Wir wollen uns in diesem Kapitel mit einigen Grundfunktion von SymPy beschäftigen. Sollten schon Vorkenntnisse zu SymPy vorhanden sein, so kann dieser Teil übersprungen werden. Bei offenen Fragen ist die Dokumentation \cite{SymPy} sehr hilfreich.\\
+
+Wir werden häufig die folgenden englischen Abkürzungen verwenden.
+
+\begin{center}
+\begin{tabularx}{0.5\linewidth}{l l}
+\lstinline|expr| & Symbolischer Ausdruck\\
+\lstinline|var| & Symbolische Variable\\
+\lstinline|lower| & Untere Grenze\\
+\lstinline|upper| & Obere Grenze\\
+\lstinline|int| & Ganze oder natürliche Zahl 
+\end{tabularx}
+\end{center}
+
+Um im Code nicht jedes mal \lstinline|sympy| ausschreiben zu müssen, wurde zu Beginn \lstinline|import sympy as sym| verwendet.\\
+
+Wir wollen nun mit SymPy Symbole definieren. Wollen wir beispielsweise der Python-Variablen \lstinline|x| die mathematische Variable $x$ zuweisen, so verwenden wir
+
+\begin{lstlisting}
+x = sym.Symbol('x')
+\end{lstlisting}
+
+Es ist wichtig SymPy möglichst viele Informationen \en{assumptions} über diese Variable zu geben. Gibt man nichts weiter an, so wird die Variable als komplexe Zahl interpretiert. Die folgende Tabelle zeigt einige Einstellungsmöglichkeiten \cite{SymPy}.
+
+\begin{center}
+\begin{tabular}{l l}
+Eigenschaft & SymPy Befehl\\
+\hline
+$x \in \mathbb{R}$ & \lstinline|real=True|\\
+$x \in \mathbb{Q}$ & \lstinline|rational=True|\\
+$x \in \mathbb{Z}$ & \lstinline|integer=True|\\
+$x > 0$ & \lstinline|positive=True|\\
+$x \geq 0$ & \lstinline|nonnegative=True|\\
+$x < 0$ & \lstinline|negative=True|\\
+$x \leq 0$ & \lstinline|nonpositive=True|\\
+$x \neq 0$ & \lstinline|nonzero=True|
+\end{tabular}
+\end{center}
+
+Diese Befehle lassen sich auch, solange kein Widerspruch entsteht, kombinieren. Möchte man beispielsweise \lstinline|n| als eine positive natürliche Zahl definieren, so verwendet man
+
+\begin{lstlisting}
+n = sym.Symbol('n', integer=True, positive=True)
+\end{lstlisting}
+
+Des Weiteren ist es möglich mehrere Symbole gleichzeitig zu definieren. Wollen wir zum Beispiel \lstinline|x|, \lstinline|y| und \lstinline|z| als reelle Zahl definieren, so schreiben wir
+
+\begin{lstlisting}
+x, y, z = sym.symbols('x, y, z', real=True)
+\end{lstlisting}
+
+Möchte man nun noch mehr Symbole auf einmal definieren, wie zum Beispiel $x_1, \dots, x_5$, so geht das mit
+
+\begin{lstlisting}
+x_1, x_2, x_3, x_4, x_5 = sym.symbols('x_1:6')
+\end{lstlisting}
+
+Es ist zu beachten, dass die letzte Zahl nicht eingeschlossen ist.\\
+
+\newpage
+
+Wollen wir nun die Funktion $x^2 + 3 x / y - \sqrt{z}$ definieren, so verwenden wir
+
+\begin{lstlisting}
+expr = x**2 + 3 * x / y - sym.sqrt(z)
+\end{lstlisting}
+
+Wichtig ist, dass man die Malpunkte, wie in Python üblich, nicht weglassen darf. Außerdem wird nicht mit \lstinline|^|, sondern mit \lstinline|**| potenziert. Zu den meisten Funktionen, wie $\arcsin$, $\exp$, $\sqrt{\phantom{x}}$ oder $\Gamma$, gibt es entsprechende SymPy Gegenstücke \lstinline|sym.asin|, \lstinline|sym.exp|, \lstinline|sym.sqrt| oder \lstinline|sym.gamma|.\\
+
+Weiterhin ist es nötig, SymPy zu erklären, wenn man einen Bruch, wie beispielsweise $1 / 2$ als symbolischen Bruch definieren möchte. Verwenden wir, wie in Python üblich, \lstinline|1 / 2|, so wird dies automatisch als Gleitkommazahl \en{float} interpretiert. Diese kann SymPy später nicht mehr richtig vereinfachen. Besondere Probleme machen periodische Zahlen oder beispielsweise die Summe \lstinline|1 / 10 + 2 / 10|, was fälschlicherweise zu \lstinline|0.30000000000000004| summiert wird. Möchte man also den Bruch $1 / 2$ definieren, so verwendet man
+
+\begin{lstlisting}
+sym.Rational(1, 2)
+\end{lstlisting}
+
+Möchten wir hingegen das Symbol \lstinline|x| halbieren, so ist \lstinline|sym.Rational(x, 2)| nicht die richtige Herangehensweise und liefert Fehler, denn SymPy interpretiert schon \lstinline|x / 2| als den symbolische Bruch $x / 2$. Falls man in SymPy Unendlichkeiten verwenden möchte, so funktioniert dies mithilfe von \lstinline|sym.oo|.\\
+
+Um zu überprüfen, ob SymPy das Eingegebene auch richtig versteht, können wir unseren Ausdruck in die Funktion \lstinline|sym.srepr| geben. Diese gibt dann genau den internen Aufbau unseres Ausdrucks wieder. Verwenden wir den Ausdruck von oben, so gibt SymPy folgendes aus:
+
+\begin{lstlisting}
+Add(Pow(Symbol('x', real=True), Integer(2)), Mul(Integer(3), Symbol('x',
+ real=True), Pow(Symbol('y', real=True), Integer(-1))), Mul(Integer(-1),
+ Pow(Symbol('z', real=True), Rational(1, 2))))
+\end{lstlisting}
+
+Es fällt auf, dass SymPy Subtraktion durch Multiplikation mit $-1$ und Addition verarbeitet. Ähnlich wird Division durch Potenzierung mit $-1$ und Multiplikation dargestellt.\\
+
+Nun werden wir einige Funktionen und Methoden betrachten, die im Programmcode häufig verwendet werden.
+
+\begin{enumerate}[label=(\roman*)]
+\item \lstinline|sym.Sum|\\
+Die Funktion \lstinline|sym.Sum(expr, (var, lower, upper))| berechnet die Summe eines Ausdrucks über eine Variable von der unteren bis zur oberen Grenze.
+
+\item \lstinline|sym.integrate|\\
+Die Funktion \lstinline|sym.integrate(expr, (var, lower, upper))| berechnet zum einen das Integral eines Ausdrucks über eine Variable von der unteren bis zur oberen Grenze. Zum anderen kann mit \lstinline|sym.integrate(expr, var)| auch eine Stammfunktion des Ausdrucks bezüglich der Variablen bestimmen werden. Verwendet man \lstinline|sym.Integral|, so erhält man das unevaluierte Integral.
+
+\item \lstinline|sym.diff|\\
+Die Funktion \lstinline|sym.diff(expr, (var, int))| berechnet die \lstinline|int|-fache Ableitung eines Ausdrucks nach einer Variablen. Lässt man \lstinline|int| weg, so wird einmal abgeleitet. Analog zur Integration kann \lstinline|sym.Derivative| verwendet werden, um ein unevaluiertes Ableitungsobjekt zu erhalten.
+
+\item \lstinline|.doit|\\
+Die Methode \lstinline|expr.doit()| zwingt SymPy einen Ausdruck zu evaluieren.
+
+\item \lstinline|sym.simplify|\\
+Die Funktion \lstinline|sym.simplify(expr)| erlaubt es SymPy einen Ausdruck zu vereinfachen. Diese Funktion kann unter Umständen viel Rechenzeit benötigen.
+
+\item \lstinline|.evalf|\\
+Die Methode \lstinline|expr.evalf(int)| zwingt SymPy einen Ausdruck mit einer bestimmten Anzahl an signifikanten Stellen zu berechnen. Dies sind standardmäßig zehn.
+
+\item \lstinline|.subs|\\
+Die Methode \lstinline|expr.subs(var, number)| kann dazu verwendet werden, in einem Ausdruck ein bestimmtes Symbol durch eine Zahl, ein anders Symbol oder einen ganzen Ausdruck zu ersetzen.
+\end{enumerate}
+
+Um Plots zu bearbeiten kann es sinnvoll sein, sich mit matplotlib zu beschäftigen. Da dies nur ein recht kleiner Teil dieser Bachelorarbeit ist, wird auf nähere Erläuterung verzichtet. Ebenso wird NumPy eine untergeordnete Rolle spielen.

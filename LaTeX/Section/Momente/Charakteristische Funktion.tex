@@ -1,0 +1,61 @@
+\subsection{Charakteristische Funktionen}
+
+In diesem Abschnitt wollen wir uns mit einer weiteren Funktion beschäftigen, die sehr eng mit der momenterzeugenden Funktion verwandt ist.
+
+\begin{Definition}{(Charakteristische Funktion)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Die \textit{charakteristische Funktion von $X$} \en{characteristic function} ist definiert durch
+\[C_X(t) := \mathbb{E}\left( \exp(i t X) \right)~.\]
+Insbesondere ist $C_X: \mathbb{D} \rightarrow \mathbb{C}: t \mapsto C_X(t)$ für $\mathbb{D} := \{ t \in \mathbb{R} \mid C_X(t) < \infty\}$ eine komplexwertige Abbildung.
+\end{Definition}
+
+Mit dem folgenden Satz werden wir einen einfachen Zusammenhang zwischen momenterzeugender und charakteristischer Funktion erkennen.
+
+\begin{Satz}{(Zusammenhang charakteristische und momenterzeugende Funktion)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable mit momenterzeugender Funktion $M_X$. Es gilt für $t \in \mathbb{D}$
+\[M_X(i t) = C_X(t)~.\]
+\end{Satz}
+
+\begin{Beweis}{}
+Betrachte zu $t \in \mathbb{D}$
+\begin{align*}
+M_X\left( i t \right) &= \mathbb{E}\left( \exp(i t X) \right)\\
+&= C_X(t)~.
+\end{align*}
+Wir können an dieser Stelle wieder einen \glqq Beweis\grqq{} mit SymPy führen. Wir formen die zu beweisende Identität um und erhalten
+\[0 = M_X(i t) - C_X(t)~.\]
+Wir betrachten nun.
+\begin{lstlisting}[numbers=left, numberstyle=\tiny\color{codegray}]
+x = sym.Symbol('x', real=True)
+t = sym.Symbol('t', real=True)
+f = sym.Function('f')(x)
+rv = RandomVariableContinuous(f, x, force_density=True)
+moment_generating_function = rv.moment_generating_function()
+characteristic_function = rv.characteristic_function()
+solution = moment_generating_function.subs(t, sym.I * t) - characteristic_function
+\end{lstlisting}
+Mit dem Ergebnis von \lstinline|0|, was zu zeigen war.
+\end{Beweis}
+
+\medskip
+
+Wir können nun auch die charakteristische Funktion verwenden, um Momente zu bestimmen.
+
+\begin{Satz}{(Momente mit charakteristischer Funktion)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Existiert das $n$-te Momente, so gilt
+\[\mathbb{E}(X^n) = \left[\frac{\d^n}{\d t^n} \frac{C_X(t)}{i^n}\right]_{t = 0}~.\]
+\end{Satz}
+
+\begin{Beweis}{}
+Betrachte mit vorigem Satz
+\begin{align*}
+\left[\frac{\d^n}{\d t^n} \frac{C_X(t)}{i^n}\right]_{t = 0} &= \left[\frac{\d^n}{\d t^n} \frac{M_X\left( i t \right)}{i^n}\right]_{t = 0}~.
+\intertext{Nach der Kettenregel erhalten wir durch das Ableiten einen Faktor von $i^n$. Da wir $t = 0$ einsetzen, ist die Multiplikation mit $i$ in der momenterzeugenden Funktion irrelevant und wir erhalten aus dem \hyperlink{Kor:Momente_MomGenFun}{\blue{Korollar über die Berechnung der Momente mithilfe der momenterzeugenden Funtion}}}
+&= \frac{i^n}{i^n} \mathbb{E}(X^n)\\
+&= \mathbb{E}(X^n)
+\end{align*}
+mittels Kürzen.
+\end{Beweis}
+
+\medskip
+
+Diese Methode wollen wir allerdings nicht weiter verwenden, da sie extrem ähnlich zur Berechnung mithilfe der momenterzeugenden Funktion ist, aber keinerlei Vorteile hat.

@@ -1,0 +1,223 @@
+\subsection{Zufallsvariablen}
+
+Die Objekte, mit denen wir uns im Folgenden beschäftigen wollen, sind reelle Zufallsvariablen. Dazu benötigen wir zunächst folgende
+
+\begin{Definition}{($\sigma$-Algebra)}
+\hypertarget{Def:Sigma}{}Sei $\Omega$ eine beliebige Menge und $\mathscr{A} \subseteq \mathcal{P}(\Omega)$ ein Mengensystem. Gilt
+\begin{enumerate}[label=\textup{(S\arabic*)}]
+\item $\Omega \in \mathscr{A}$
+\item $\forall A \in \mathscr{A}: A^\complement \in \mathscr{A}$
+\item $\forall (A_n)_{n \in \mathbb{N}_0} \subseteq \mathscr{A}: \bigcup_{n \in \mathbb{N}_0} A_n \in \mathscr{A}$~,
+\end{enumerate}
+so ist $\mathscr{A}$ eine \textit{$\sigma$-Algebra} und $(\Omega, \mathscr{A})$ ein \textit{Messraum}.
+\end{Definition}
+
+Die Eigenschaft (S2) bezeichnet man auch als \textit{Komplementstabilität} und die Eigenschaft (S3) als \textit{$\sigma$-Vereinigungsstabilität}.
+
+\begin{Beispiel}{($\sigma$-Algebren)}
+Wir werden nun einige einfache und häufig vorkommende Beispiele für $\sigma$-Algebren betrachten. Gegeben sei zunächst eine beliebige Menge $\Omega$.
+\begin{enumerate}[label=(\roman*)]
+\item Die kleinste (\textit{gröbste}) $\sigma$-Algebra ist gegeben durch
+\[\mathscr{A} = \{ \emptyset, \Omega \}~.\]
+\item Die größte (\textit{feinste}) $\sigma$-Algebra ist gegeben durch
+\[\mathscr{A} = \mathcal{P}(\Omega)~.\]
+Ist $\Omega$ höchstens abzählbar, so verwenden wir genau diese Potenzmenge als $\sigma$-Algebra.
+\end{enumerate}
+Sei nun $\Omega = \mathbb{R}$ die reellen Zahlen.
+\begin{enumerate}[label=(\roman*), resume]
+\item In diesem Fall verwenden wir die \textit{Borelsche-$\sigma$-Algebra}
+\[\mathscr{A} = \mathscr{B}~.\]
+Diese wird erzeugt von den offenen Mengen.
+\end{enumerate}
+Sei weiter $\Omega = [a, b]$ ein reelles Intervall mit $a < b$.
+\begin{enumerate}[label=(\roman*), resume]
+\item In diesem Fall verwenden wir auch die \textit{Borelsche-$\sigma$-Algebra}, müssen sie aber folgendermaßen einschränken
+\begin{align*}
+\mathscr{A} &= \mathscr{B}_{[a, b]}\\
+&= \{ B \cap [a, b] \mid B \in \mathscr{B} \}~.
+\end{align*}
+Diese Konstruktion verläuft auch analog für andere Borel-Mengen.
+\end{enumerate}
+\end{Beispiel}
+
+\newpage
+
+Mit diesen Begriffen können wir nun Messbarkeit definieren.
+
+\begin{Definition}{(Messbarkeit)}
+Gegeben seien zwei Messräume $(\Omega_1, \mathscr{A}_1)$ und $(\Omega_2, \mathscr{A}_2)$, sowie eine Abbildung $f: (\Omega_1, \mathscr{A}_1) \rightarrow (\Omega_2, \mathscr{A}_2)$. Gilt für alle $A_2 \in \mathscr{A}_2$
+\[f^{-1}(A_2) \in \mathscr{A}_1~,\]
+so nennt man $f$ \textit{$\mathscr{A}_1$-$\mathscr{A}_2$-messbar} oder kurz \textit{messbar}.
+\end{Definition}
+
+Wir wollen nun ein paar Beispiele für messbare Abbildungen betrachten.
+
+\begin{Beispiel}{(Messbare Abbildungen)}
+\begin{enumerate}[label=(\roman*)]
+\item Gegeben sei $(\mathbb{R}, \mathscr{B})$ und $f \in \mathcal{C}^0(\mathbb{R}, \mathbb{R})$ eine stetige Funktion. Dann ist $f$ messbar. Sei $O_2 \in \mathscr{B}$ eine offene Menge. Nach Definition der Stetigkeit existiert eine weitere offene Menge $O_1 \in \mathscr{B}$, sodass
+\[f^{-1}(O_2) = O_1\]
+ist. Da die Borelschen-$\sigma$-Algebra von den offenen Mengen erzeugt wird, ist $f$ messbar.
+
+\item Gegeben sei $(\Omega, \mathscr{A})$ und ein $A \in \mathscr{A}$. Dann ist $\indi_A$ messbar. Sei $B \in \mathscr{B}$. Betrachte nun die folgenden Fallunterscheidung
+
+{
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{0.5\linewidth}{X X}
+$0, 1 \in B$ & $\indi_B^{-1}(B) = \mathbb{R}$\\
+$0 \in B, 1 \notin B$ & $\indi_B^{-1}(B) = A^\complement$\\
+$0 \notin B, 1 \in B$ & $\indi_B^{-1}(B) = A$\\
+$0, 1 \notin B$ & $\indi_B^{-1}(B) = \emptyset$
+\end{tabularx}
+}
+
+Alle Mengen rechts sind nach \hyperlink{Def:Sigma}{\blue{Definition}} in der Borel-$\sigma$-Algebra.
+
+\item Gegeben sei $\Omega = \{\omega_1, \omega_2, \omega_3\}$ und $\mathscr{A} = \{ \emptyset, \{\omega_1, \omega_2\}, \{\omega_3\}, \Omega\}$. Weiter sei
+\begin{align*}
+f: (\Omega, \mathscr{A}) \rightarrow (\{0, 1\}, \mathcal{P}(\{0, 1\})):~ &\omega_1 \mapsto 0\\
+&\omega_2 \mapsto 0\\
+&\omega_3 \mapsto 1~.
+\end{align*}
+Es gilt
+\[\mathcal{P}(\{0, 1\}) = \{ \emptyset, \{0\}, \{1\}, \{0, 1\} \}~.\]
+Betrachte also
+\begin{align*}
+f^{-1}(\emptyset) &= \emptyset\\
+f^{-1}(\{0\}) &= \{\omega_1, \omega_2\}\\
+f^{-1}(\{1\}) &= \{\omega_3\}\\
+f^{-1}(\{0, 1\}) &= \Omega~.
+\end{align*}
+Da all diese Mengen in $\mathscr{A}$ liegen, ist $f$ messbar. Verwenden wir hingegen $\{\emptyset, \Omega\}$ als $\sigma$-Algebra, so ist $f$ nicht mehr messbar, da das Urbild von $\{0\}$ nicht in der $\sigma$-Algebra liegt.
+\end{enumerate}
+Vor allem an diesem letzten Beispiel sehen wir, dass Messbarkeit stark von den verwendeten $\sigma$-Algebren abhängt.
+\end{Beispiel}
+
+\newpage
+
+Um unsere Reise durch die Maßtheorie fortsetzen zu können, benötigen wir noch das namensgebende Maß.
+
+\begin{Definition}{(Maß)}
+\hypertarget{Def:Maß}{}Sei $(\Omega, \mathscr{A})$ ein Messraum und $\mu: \mathscr{A} \rightarrow \overline{\mathbb{R}}$ eine Abbildung. Gilt
+\begin{enumerate}[label=\textup{(M\arabic*)}]
+\item $\mu(\emptyset) = 0$
+\item $\forall A \in \mathscr{A}: \mu(A) \geq 0$
+\item $\forall (A_n)_{n \in \mathbb{N}_0} \subseteq \mathscr{A} ~\text{disjunkt}: \mu\left(\bigsqcup_{n \in \mathbb{N}_0} A_n\right) = \sum_{n \in \mathbb{N}_0} \mu(A_n)$~,
+\end{enumerate}
+so ist $\mu$ ein \textit{Maß} und $(\Omega, \mathscr{A}, \mu)$ ein \textit{Maßraum}. Existiert eine Folge $(A_n)_{n \in \mathbb{N}_0} \subseteq \mathscr{A}$, sodass deren Vereinigung $\Omega$ ist und $\mu(A_n) < \infty$ für alle $n \in \mathbb{N}_0$ ist, so nennt man $\mu$ sogar \textit{$\sigma$-endlich}. Gilt zudem $\mu(\Omega) = 1$, so ist $\mu$ ein \textit{Wahrscheinlichkeitsmaß}, welches man häufig mit $\mathbb{P}$ bezeichnen und $(\Omega, \mathscr{A}, \mathbb{P})$ ein \textit{Wahrscheinlichkeitsraum}.
+\end{Definition}
+
+Die Eigenschaften (M1) und (M3) bezeichnet man auch als \textit{Nulltreue} respektive \textit{$\sigma$-Additivität}. Die definierende Eigenschaft eines Wahrscheinlichkeitsmaßes bezeichnet man auch als \textit{Normiertheit}.
+
+\begin{Bemerkung}{($\sigma$-Endlichkeit von Wahrscheinlichkeitsmaß)}
+Sei $\mathbb{P}$ ein Wahrscheinlichkeitsmaß. Dann ist $\mathbb{P}$ insbesondere $\sigma$-endlich. Sei dazu $A_n = \Omega$ für alle $n \in \mathbb{N}_0$. Dann gilt offenbar
+\[\bigcup_{n \in \mathbb{N}_0} A_n = \Omega~.\]
+Außerdem gilt für alle $n \in \mathbb{N}_0$
+\[\mathbb{P}(A_n) = 1 < \infty~,\]
+was zu zeigen war.
+\end{Bemerkung}
+
+Wir werden nun einige Beispiele für Maße sehen.
+
+\begin{Beispiel}{(Maße)}
+\begin{enumerate}[label=(\roman*)]
+\item Lebesgue-Maß $\lambda$: Dies ist das \glqq natürliche\grqq{} Maß, dass wir schon aus der Schule kennt. Für $a < b$ aus $\mathbb{R}$ gilt
+\[\lambda([a, b]) = b - a~,\]
+was genau die Länge des Intervalls ist. Das Lebesgue-Maß ist ein Maß auf $(\mathbb{R}, \mathscr{B})$. 
+
+\item Zählmaß $\#$: Sei $\Omega$ höchstens abzählbar. Für ein $A \in \mathcal{P}(\Omega)$ gilt
+\[\#(A) = \abs{A}~,\]
+was genau die Mächtigkeit der Menge ist. Das Zählmaß ist ein ein Maß auf $(\Omega, \mathcal{P}(\Omega))$.
+
+\item Dirac-Maß $\delta_{\{\omega\}}$: Sei $(\Omega, \mathscr{A})$ Messraum. Für $A \in \mathscr{A}$ definieren wir
+\[\delta_{\{\omega\}} := \begin{cases}
+1 &, \omega \in A\\
+0 &, \omega \notin A~.
+\end{cases}\]
+Das Dirac-Maß zu $\omega \in \Omega$ ist sogar ein Wahrscheinlichkeitsmaß auf $(\Omega, \mathscr{A})$.
+\end{enumerate}
+Die ersten beiden Maße sind die wichtigsten, da es dank der Analysis und insbesondere dem Hauptsatz der Differential- und Integralrechnung starke Werkzeuge für deren Berechnung gibt.
+\end{Beispiel}
+
+\newpage
+
+Wir haben nun alle nötigen Definitionen beisammen, um uns Zufallsvariablen sauber definieren zu können. Wir werden nun sehen, dass Zufallsvariablen eine spezielle Art messbarer Abbildungen sind.
+
+\begin{Definition}{(Zufallsvariable)}
+Gegeben sei ein Wahrscheinlichkeitsraum $(\Omega, \mathscr{A}, \mathbb{P})$ und eine Abbildung $X: (\Omega, \mathscr{A}, \mathbb{P}) \rightarrow (\mathbb{R}, \mathscr{B})$. $X$ heißt \textit{reelle Zufallsvariable}, falls $X$ Borel-messbar ist. Es soll also
+\[X^{-1}(B) \in \mathscr{A}\]
+für alle $B \in \mathscr{B}$ gelten.
+\end{Definition}
+
+Wir wollen uns mit der maßtheoretischen Frage der Messbarkeit nicht weiter beschäftigen. Daher verzichten wir im Folgenden auf die explizite Nennung der Start- und Zielräume der Zufallsvariablen.\\
+
+Nun werden wir eine Möglichkeit finden, wie wir mithilfe von Zufallsvariablen aus alten Wahrscheinlichkeitsmaßen neue bilden können.
+
+\begin{Definition}{(Bildmaß)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Durch 
+\[\mathbb{P}_X: \mathscr{B} \rightarrow [0, 1]: B \mapsto \mathbb{P}_X(B) := \mathbb{P}(X^{-1}(B))\]
+ist das \textit{Bildmaß} von $\mathbb{P}$ unter $X$ definiert.
+\end{Definition}
+
+Wir können uns nun davon überzeugen, dass das Bildmaß auch tatsächlich ein Wahrscheinlichkeitsmaß ist.
+
+\begin{Satz}{(Bildmaß ist Wahrscheinlichkeitsmaß)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum und $X$ eine reelle Zufallsvariable. Dann ist $\mathbb{P}_X$ ein Wahrscheinlichkeitsmaß auf $(\mathbb{R}, \mathscr{B})$.
+\end{Satz}
+
+\begin{Beweis}{}
+Wir rechnen die nötigen Eigenschaften nach.\\
+
+Zur Wohldefiniertheit:\\
+Da $X$ eine messbare Abbildung ist, ist für $B \in \mathscr{B}$ dann $X^{-1}(B) \in \mathscr{A}$. Da $\mathbb{P}$ ein Wahrscheinlichkeitsmaß auf $(\Omega, \mathscr{A})$ ist, können wir dies auf $[0, 1]$ abbilden.\\
+
+Zu (M1):\\
+Betrachte
+\begin{align*}
+\mathbb{P}_X(\emptyset) &= \mathbb{P}(X^{-1}(\emptyset))~.
+\intertext{Da das Urbild der leeren Menge die leere Menge selbst ist, folgt}
+&= \mathbb{P}(\emptyset)\\
+&= 0~,
+\end{align*}
+da für $\mathbb{P}$ insbesondere (M1) gilt.\\
+
+Zu (M2):\\
+Sei $B \in \mathscr{B}$ eine Borel-Menge. Betrachte
+\begin{align*}
+\mathbb{P}_X(B) &= \mathbb{P}(X^{-1}(B))~.
+\intertext{Da $X$ messbar ist, existiert ein $A \in \mathscr{A}$, sodass $X^{-1}(B) = A$ ist. Damit erhalten wir}
+&= \mathbb{P}(A) > 0~,
+\end{align*}
+da für $\mathbb{P}$ insbesondere (M2) gilt.
+
+\newpage
+
+Zu (M3):\\
+Seien $(B_n)_{n \in \mathbb{N}_0} \subset \mathscr{B}$ disjunkt. Betrachte
+\begin{align*}
+\mathbb{P}_X\left( \bigsqcup_{n \in \mathbb{N}_0} B_n \right) &= \mathbb{P}\left( X^{-1}\left( \bigsqcup_{n \in \mathbb{N}_0} B_n \right) \right)\\
+&= \mathbb{P}\left( \bigsqcup_{n \in \mathbb{N}_0} X^{-1}(B_n) \right)~.
+\intertext{Da für $\mathbb{P}$ insbesondere (M3) gilt, folgt}
+&= \sum_{n \in \mathbb{N}_0} \mathbb{P}(X^{-1}(B_n))\\
+&= \sum_{n \in \mathbb{N}_0} \mathbb{P}_X(B_n)~.
+\end{align*}
+
+Zur Normiertheit:\\
+Betrachte
+\begin{align*}
+\mathbb{P}_X(\mathbb{R}) &= \mathbb{P}(X^{-1}(\mathbb{R}))~.
+\intertext{Da das Urbild des gesamten Bildraums der gesamte Urbildraum ist, gilt}
+&= \mathbb{P}(\Omega)\\
+&= 1~,
+\end{align*}
+da $\mathbb{P}$ insbesondere normiert ist.\\
+
+Somit ist $\mathbb{P}_X$ ein Wahrscheinlichkeitsmaß.
+\end{Beweis}
+
+\vspace{\baselineskip}
+
+Da wir nun bewiesen haben, dass $\mathbb{P}_X$ ein Wahrscheinlichkeitsmaß ist, können wir nun den umgangssprachlichen Begriff der \glqq Wahrscheinlichkeit\grqq{} mathematisch definieren.
+
+\begin{Bemerkung}{(Wahrscheinlichkeit)}
+Sei $(\Omega, \mathscr{A}, \mathbb{P})$ ein Wahrscheinlichkeitsraum. Zu einer Zufallsvariable $X$ können wir $\mathbb{P}_X(B)$ als \textit{Wahrscheinlichkeit} für das Ereignis $B \in \mathscr{B}$ interpretieren. Da $\mathbb{P}$ ein Wahrscheinlichkeitsmaß ist, ist $\mathbb{P}_X(A) \in [0, 1]$. Dies ist eine direkte Folge aus (M2) und der Normiertheit.
+\end{Bemerkung}
